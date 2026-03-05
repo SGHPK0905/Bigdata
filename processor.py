@@ -44,7 +44,7 @@ def process_batch(batch_df, batch_id):
         .mode("overwrite") \
         .option("header", "true") \
         .save("/app/ket_qua_output")
-    print("✅ Xong batch này!\n")
+
 
 # 6. Kích hoạt Stream
 print("🚀 Spark đã sẵn sàng! Đang lắng nghe Kafka (Cập nhật file mỗi 10s)...")
