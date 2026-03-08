@@ -2,12 +2,12 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, IntegerType
 
-# 1. Khởi tạo Spark
-print("⏳ Đang khởi động Spark...")
-spark = SparkSession.builder.appName("WebLogAnalysis").getOrCreate()
-spark.sparkContext.setLogLevel("WARN") # Ẩn bớt log rác
+print("⏳ Đang khởi động Hệ thống Giám sát An ninh mạng (SIEM)...")
+spark = SparkSession.builder.appName("BruteForceDetection").getOrCreate()
 
-# 2. Định nghĩa khuôn dạng dữ liệu (Phải khớp với bên Producer gửi sang)
+# CHÌA KHÓA Ở ĐÂY: Đổi "WARN" thành "ERROR" để dọn rác màn hình
+spark.sparkContext.setLogLevel("ERROR")
+
 schema = StructType() \
     .add("ip", StringType()) \
     .add("url", StringType()) \
@@ -15,7 +15,6 @@ schema = StructType() \
     .add("status", IntegerType()) \
     .add("time", StringType())
 
-# 3. Đọc dữ liệu từ Kafka (Kết nối nội bộ Docker)
 df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:29092") \
@@ -23,36 +22,37 @@ df = spark.readStream \
     .option("startingOffsets", "latest") \
     .load()
 
-# 4. Giải mã dữ liệu JSON
 parsed_df = df.select(from_json(col("value").cast("string"), schema).alias("data")).select("data.*")
 
-# 5. XỬ LÝ: Đếm số lượng truy cập theo từng URL
-traffic_report = parsed_df.groupBy("url").count()
+# 1. Lọc log Đăng nhập thất bại
+failed_logins = parsed_df.filter((col("url") == "/login") & (col("status") == 401))
 
-# --- HÀM XỬ LÝ QUAN TRỌNG (Vừa in ra màn hình, vừa lưu file) ---
-def process_batch(batch_df, batch_id):
-    print(f"🔄 Đang xử lý Batch: {batch_id}")
-    
-    # A. Hiện bảng ra màn hình (Console)
-    print("--- BẢNG THỐNG KÊ TRUY CẬP (REAL-TIME) ---")
-    batch_df.show(truncate=False)
-    
-    # B. Lưu xuống file CSV (Ghi đè để luôn lấy số liệu mới nhất)
-    print("💾 Đang lưu kết quả vào folder: /app/ket_qua_output")
-    batch_df.write \
-        .format("csv") \
-        .mode("overwrite") \
-        .option("header", "true") \
-        .save("/app/ket_qua_output")
-    print("✅ Xong batch này!\n")
+# 2. Gom nhóm theo IP và đếm
+brute_force_stats = failed_logins.groupBy("ip").count()
 
-# 6. Kích hoạt Stream
-print("🚀 Spark đã sẵn sàng! Đang lắng nghe Kafka (Cập nhật file mỗi 10s)...")
+# 3. Lọc ra các IP thuộc mạng Botnet (sai > 10 lần)
+blacklist_ips = brute_force_stats.filter(col("count") > 10)
 
-query = traffic_report.writeStream \
+def process_alerts(batch_df, batch_id):
+    hacker_count = batch_df.count()
+    if hacker_count > 0:
+        print(f"\n🚨 [BATCH {batch_id}] PHÁT HIỆN TẤN CÔNG BOTNET! DANH SÁCH {hacker_count} IP BỊ CHẶN:")
+        batch_df.show(truncate=False)
+        
+        batch_df.write \
+            .format("csv") \
+            .mode("overwrite") \
+            .option("header", "true") \
+            .save("/app/ket_qua_output")
+    else:
+        # In dấu chấm nhỏ để biết hệ thống vẫn đang theo dõi mà không làm rác màn hình
+        print(".", end="", flush=True)
+
+print("🚀 SIEM đã sẵn sàng! Đang phân tích hàng triệu luồng truy cập...")
+query = blacklist_ips.writeStream \
     .outputMode("complete") \
-    .foreachBatch(process_batch) \
-    .trigger(processingTime='10 seconds') \
-    .start()  # <--- THÊM DÒNG TRÊN VÀO TRƯỚC .start()
+    .foreachBatch(process_alerts) \
+    .trigger(processingTime='5 seconds') \
+    .start()
 
 query.awaitTermination()

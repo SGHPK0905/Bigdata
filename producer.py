@@ -5,49 +5,63 @@ from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 from datetime import datetime
 
-print("⏳ Đang tìm kiếm Kafka tại localhost:9092...")
-
-# Vòng lặp thử kết nối (Retry Logic)
+print("⏳ Đang kết nối tới Kafka...")
 producer = None
-for i in range(10): # Thử 10 lần
+for i in range(10):
     try:
         producer = KafkaProducer(
             bootstrap_servers=['localhost:9092'],
             value_serializer=lambda x: json.dumps(x).encode('utf-8')
         )
-        print("✅ Đã kết nối thành công với Kafka!")
-        break # Kết nối được thì thoát vòng lặp
+        print("✅ Kết nối thành công!")
+        break
     except NoBrokersAvailable:
-        print(f"⚠️ Chưa thấy Kafka (Lần thử {i+1}/10). Đang chờ 3 giây...")
         time.sleep(3)
 
 if not producer:
-    print("❌ Lỗi: Không thể kết nối tới Kafka sau 30 giây. Hãy kiểm tra lại Docker!")
+    print("❌ Lỗi kết nối Kafka.")
     exit()
 
-print("🚀 Bắt đầu giả lập lưu lượng truy cập Web...")
+print("🚀 Đang giả lập mạng Botnet tấn công Brute Force vào trang /login...")
 
-# Danh sách IP và URL giả lập
-ips = ["192.168.1.1", "192.168.1.5", "10.0.0.2", "172.16.0.55"]
-urls = ["/home", "/products", "/cart", "/login", "/checkout", "/contact"]
-methods = ["GET", "POST"]
+urls = ["/home", "/products", "/contact", "/login", "/about", "/api/data"]
+
+# Hàm sinh IP ngẫu nhiên toàn cầu (Giả lập Big Data)
+def generate_random_ip():
+    return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+
+# Tạo một nhóm 50 IP của Hacker (Botnet) để xoay vòng tấn công
+botnet_ips = [generate_random_ip() for _ in range(50)]
 
 while True:
     try:
-        log_entry = {
-            "ip": random.choice(ips),
-            "url": random.choice(urls),
-            "method": random.choice(methods),
-            "response_time": random.randint(50, 500),
-            "status_code": random.choice([200, 200, 200, 404, 500]),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        # Tỉ lệ 30% là mạng Botnet của Hacker tấn công, 70% là traffic toàn cầu
+        if random.random() < 0.3:
+            log = {
+                "ip": random.choice(botnet_ips), # Hacker dùng IP trong mảng Botnet
+                "url": "/login",
+                "method": "POST",
+                "status": 401, # 401: Unauthorized (Đăng nhập thất bại)
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            # Không in ra dòng này nữa để mô phỏng log thật chạy ngầm rất nhanh
+        else:
+            log = {
+                "ip": generate_random_ip(), # Hàng triệu IP ngẫu nhiên toàn cầu
+                "url": random.choice(urls),
+                "method": "GET" if random.choice(urls) != "/login" else "POST",
+                "status": random.choice([200, 200, 200, 404]), 
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
         
-        # Gửi vào topic 'web-logs'
-        producer.send('web-logs', value=log_entry)
-        print(f"📡 Sent: {log_entry['ip']} -> {log_entry['url']}")
+        producer.send('web-logs', value=log)
         
-        time.sleep(1)
+        # In ra màn hình cho vui mắt (mô phỏng tốc độ cao)
+        print(f"📡 Sinh log: {log['ip']} -> {log['url']} [{log['status']}]")
+        
+        # Giảm thời gian chờ xuống 0.05s để bơm dữ liệu cực nhanh (Big Data)
+        time.sleep(0.05) 
+        
     except Exception as e:
-        print(f"Lỗi khi gửi: {e}")
-        time.sleep(1)
+        print(f"Lỗi: {e}")
+        
