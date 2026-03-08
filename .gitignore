@@ -1,0 +1,12 @@
+
+ket_qua_output/
+checkpoint_dir/
+.checkpoint/
+
+*.crc
+*.csv
+_SUCCESS
+
+__pycache__/
+.venv/
+venv/
