@@ -77,21 +77,25 @@ if not df.empty:
             display_df.index = range(1, len(display_df) + 1)
             st.dataframe(display_df, width='stretch', height=350)
 
-    chart_col1, chart_col2 = st.columns([2, 1])
     with chart_col1:
         if 'time' in df.columns:
             time_df = df.dropna(subset=['time']).copy()
             time_df['time_sec'] = time_df['time'].dt.floor('s') 
-            trend = time_df.groupby('time_sec').size().reset_index(name='Requests')
+            
+            latest_time = time_df['time_sec'].max()
+            start_time = latest_time - pd.Timedelta(seconds=60)
+            recent_df = time_df[time_df['time_sec'] >= start_time]
+            
+            trend = recent_df.groupby('time_sec').size().reset_index(name='Requests')
+            
             fig_line = px.area(trend, x='time_sec', y='Requests', template="plotly_dark")
-
             fig_line.update_layout(
-                uirevision='line_lock', 
-                xaxis=dict(fixedrange=False),
-                yaxis=dict(fixedrange=False), 
+                xaxis=dict(range=[start_time, latest_time], fixedrange=True),
+                yaxis=dict(fixedrange=True),
                 paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10}
             )
-            st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
+            fig_line.update_traces(mode='lines+markers', marker=dict(size=4), fillcolor='rgba(14, 165, 233, 0.2)')
+            st.plotly_chart(fig_line, width='stretch', key="line", config={'displayModeBar': False})
 
     with chart_col2:
         status_dist = df.groupby('status').size().reset_index(name='count')
