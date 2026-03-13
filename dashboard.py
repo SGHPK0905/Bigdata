@@ -18,7 +18,6 @@ st.markdown("""
     .alert-text { border-left-color: #ef4444; }
     .warn-text { border-left-color: #f59e0b; }
     .success-text { border-left-color: #10b981; }
-    .chart-desc { font-size: 12px; color: #94a3b8; font-style: italic; margin-bottom: 10px; display: block;}
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
     .stTabs [data-baseweb="tab"] { background-color: #1e293b; border-radius: 4px 4px 0 0; padding: 10px 20px; color: #94a3b8; }
     .stTabs [aria-selected="true"] { background-color: #38bdf8 !important; color: #0b1121 !important; font-weight: bold;}
@@ -45,12 +44,7 @@ if list_of_files:
 
 df = st.session_state.last_valid_df
 
-col_title, col_toggle = st.columns([3, 1])
-with col_title: 
-    st.markdown("<h3 style='color: #38bdf8;'>🛡️ TỔNG TÀI DOANH NGHIỆP: SIEM & BUSINESS INTELLIGENCE</h3>", unsafe_allow_html=True)
-with col_toggle: 
-    st.write("")
-    is_paused = st.toggle("⏸️ TẠM DỪNG ĐỂ PHÂN TÍCH", value=False)
+st.markdown("<h3 style='color: #38bdf8;'>🛡️ TỔNG TÀI DOANH NGHIỆP: SIEM & BUSINESS INTELLIGENCE</h3>", unsafe_allow_html=True)
 
 if not df.empty:
     brute_df = df[(df['status'] == 401)]
@@ -67,14 +61,14 @@ if not df.empty:
 
     total_bad_ips = len(pd.concat([brute_ips['ip'], scan_ips['ip'], scrape_ips['ip']]).unique())
 
-    tab_soc, tab_bi = st.tabs(["🚨 TRUNG TÂM SOC (AN NINH)", "📈 TRUNG TÂM BI (KINH DOANH & SALES)"])
+    tab_soc, tab_bi = st.tabs(["🚨 TRUNG TÂM SOC (AN NINH)", "📈 TRUNG TÂM BI (KINH DOANH)"])
 
     with tab_soc:
         c1, c2, c3, c4 = st.columns(4)
         c1.markdown(f'<div class="kpi-box"><div class="kpi-title">Tổng Requests</div><div class="kpi-value">{len(df)}</div></div>', unsafe_allow_html=True)
-        c2.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Cảnh báo Brute Force (401)</div><div class="kpi-value" style="color:#f87171;">{len(brute_ips)} IP</div></div>', unsafe_allow_html=True)
-        c3.markdown(f'<div class="kpi-box warn-text"><div class="kpi-title">Phát hiện Rà quét (404)</div><div class="kpi-value" style="color:#f59e0b;">{len(scan_ips)} IP</div></div>', unsafe_allow_html=True)
-        c4.markdown(f'<div class="kpi-box warn-text"><div class="kpi-title">Phát hiện Cào Data (Bot)</div><div class="kpi-value" style="color:#f59e0b;">{len(scrape_ips)} IP</div></div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Lỗi 401 (Brute Force)</div><div class="kpi-value" style="color:#f87171;">{len(brute_ips)} IP</div></div>', unsafe_allow_html=True)
+        c3.markdown(f'<div class="kpi-box warn-text"><div class="kpi-title">Lỗi 404 (Scanner)</div><div class="kpi-value" style="color:#f59e0b;">{len(scan_ips)} IP</div></div>', unsafe_allow_html=True)
+        c4.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Tổng IP Sổ Đen</div><div class="kpi-value" style="color:#ef4444;">{total_bad_ips}</div></div>', unsafe_allow_html=True)
         
         st.write("")
         map_col, table_col = st.columns([2, 1])
@@ -85,7 +79,7 @@ if not df.empty:
             if not bad_ip_list.empty:
                 bad_ip_list['lat'], bad_ip_list['lon'] = zip(*bad_ip_list['ip'].apply(get_lat_lon))
                 fig_map = px.scatter_geo(bad_ip_list, lat='lat', lon='lon', size='count', color='count', color_continuous_scale="Reds", projection="natural earth")
-                fig_map.update_layout(uirevision='map', margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
+                fig_map.update_layout(uirevision='map', margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a', showcountries=True, countrycolor='#334155'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
                 st.plotly_chart(fig_map, width='stretch', key="map")
             else: 
                 st.info("Hệ thống an toàn.")
@@ -93,15 +87,94 @@ if not df.empty:
         with table_col:
             st.markdown("<h5 style='color: #e2e8f0;'>⚠️ CHI TIẾT KẺ TẤN CÔNG</h5>", unsafe_allow_html=True)
             if not brute_ips.empty:
-                st.error(f"Thám sát: {len(brute_ips)} IP đang dò Pass")
-                st.dataframe(brute_ips.rename(columns={'ip':'IP Hacker', 'count':'Lần thử'}), width='stretch', height=120)
+                brute_display = brute_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Dò Pass', 'count':'Lần thử'})
+                brute_display.index = range(1, len(brute_display) + 1)
+                st.dataframe(brute_display, width='stretch', height=250)
             if not scan_ips.empty:
-                st.warning(f"Thám sát: {len(scan_ips)} IP đang tìm Lỗ hổng (404)")
-                st.dataframe(scan_ips.rename(columns={'ip':'IP Scanner', 'count':'Số lỗi 404'}), width='stretch', height=120)
+                scan_display = scan_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Quét Lỗi', 'count':'Lỗi 404'})
+                scan_display.index = range(1, len(scan_display) + 1)
+                st.dataframe(scan_display, width='stretch', height=250)
+
+        st.markdown("---")
+        chart_col1, chart_col2 = st.columns([2, 1])
+        
+        with chart_col1:
+            line_header, line_toggle = st.columns([2, 1])
+            line_header.markdown("<h5 style='color: #e2e8f0;'>📈 DIỄN BIẾN LƯU LƯỢNG (60s)</h5>", unsafe_allow_html=True)
+            freeze_chart = line_toggle.toggle("🔍 Khóa Line Chart", value=False)
+            
+            if 'time' in df.columns:
+                time_df = df.dropna(subset=['time']).copy()
+                time_df['time_sec'] = time_df['time'].dt.floor('s') 
+                latest_time = time_df['time_sec'].max()
+                start_time = latest_time - pd.Timedelta(seconds=60)
+                recent_df = time_df[time_df['time_sec'] >= start_time]
+                trend = recent_df.groupby('time_sec').size().reset_index(name='Requests')
+                
+                if freeze_chart:
+                    if 'frozen_trend' not in st.session_state:
+                        st.session_state.frozen_trend = trend.copy()
+                        st.session_state.frozen_start = start_time
+                        st.session_state.frozen_latest = latest_time
+                    plot_data = st.session_state.frozen_trend
+                    plot_start = st.session_state.frozen_start
+                    plot_latest = st.session_state.frozen_latest
+                else:
+                    if 'frozen_trend' in st.session_state:
+                        del st.session_state['frozen_trend']
+                        del st.session_state['frozen_start']
+                        del st.session_state['frozen_latest']
+                    plot_data = trend
+                    plot_start = start_time
+                    plot_latest = latest_time
+
+                fig_line = px.area(plot_data, x='time_sec', y='Requests', template="plotly_dark")
+                fig_line.update_layout(
+                    xaxis=dict(range=[plot_start, plot_latest], fixedrange=not freeze_chart), 
+                    yaxis=dict(fixedrange=not freeze_chart),
+                    paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10}
+                )
+                fig_line.update_traces(mode='lines+markers', marker=dict(size=4), fillcolor='rgba(14, 165, 233, 0.2)')
+                st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
+
+        with chart_col2:
+            st.markdown("<h5 style='color: #e2e8f0;'>🍩 MÃ TRẠNG THÁI HTTP</h5>", unsafe_allow_html=True)
+            status_dist = df.groupby('status').size().reset_index(name='count')
+            status_dist['status'] = status_dist['status'].astype(str)
+            status_map = {'200': '200 (Hợp lệ)', '401': '401 (Sai Pass)', '404': '404 (Không thấy)', '500': '500 (Quá tải)'}
+            status_dist['Tên'] = status_dist['status'].map(status_map).fillna(status_dist['status'])
+            color_map = {'200 (Hợp lệ)': '#10b981', '401 (Sai Pass)': '#ef4444', '404 (Không thấy)': '#f59e0b', '500 (Quá tải)': '#f97316'}
+            
+            fig_pie = px.pie(status_dist, values='count', names='Tên', color='Tên', color_discrete_map=color_map, hole=0.5, template="plotly_dark")
+            fig_pie.update_layout(uirevision='pie_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10}, legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
+            st.plotly_chart(fig_pie, width='stretch', key="pie")
+
+        c3, c4 = st.columns([2, 1])
+        with c3:
+            st.markdown("<h5 style='color: #e2e8f0;'>🎯 TOP ĐƯỜNG DẪN BỊ NHẮM TỚI</h5>", unsafe_allow_html=True)
+            url_dist = df.groupby('url').size().reset_index(name='count').sort_values(by='count')
+            fig_bar = px.bar(url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Blues", template="plotly_dark")
+            fig_bar.update_layout(uirevision='bar_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False, margin={"t":10}, xaxis_title="", yaxis_title="")
+            st.plotly_chart(fig_bar, width='stretch', key="bar")
+
+        with c4:
+            st.markdown("<h5 style='color: #e2e8f0;'>⏱️ MỨC ĐỘ ĐE DỌA</h5>", unsafe_allow_html=True)
+            max_gauge_val = max(150, total_bad_ips + 50) 
+            fig_gauge = go.Figure(go.Indicator(
+                mode="gauge+number", value=total_bad_ips, 
+                gauge={
+                    'axis': {'range': [0, max_gauge_val]}, 'bar': {'color': "#ef4444"},
+                    'steps': [
+                        {'range': [0, max_gauge_val * 0.3], 'color': "#064e3b"},
+                        {'range': [max_gauge_val * 0.3, max_gauge_val * 0.7], 'color': "#b45309"},
+                        {'range': [max_gauge_val * 0.7, max_gauge_val], 'color': "#7f1d1d"}
+                    ]
+                }
+            ))
+            fig_gauge.update_layout(uirevision='gauge_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10, "l":20, "r":20}, font={'color': "white"})
+            st.plotly_chart(fig_gauge, width='stretch', key="gauge")
 
     with tab_bi:
-        st.markdown("<span class='chart-desc'>Giao diện dành riêng cho Giám đốc Kinh doanh và Marketing để theo dõi hành vi mua hàng.</span>", unsafe_allow_html=True)
-        
         sale_df = df[df['status'] == 200]
         
         b1, b2, b3, b4 = st.columns(4)
@@ -128,13 +201,13 @@ if not df.empty:
             st.plotly_chart(fig_funnel, width='stretch')
 
         with chart_bi2:
-            st.markdown("<h5 style='color: #e2e8f0;'>🍩 HÀNH VI BOT CÀO DỮ LIỆU</h5>", unsafe_allow_html=True)
-            st.markdown("<span class='chart-desc'>Những IP có tốc độ tải trang quá nhanh (bị tình nghi là đối thủ đang copy giá sản phẩm).</span>", unsafe_allow_html=True)
+            st.markdown("<h5 style='color: #e2e8f0;'>🤖 BOT CÀO DỮ LIỆU ĐỐI THỦ</h5>", unsafe_allow_html=True)
             if not scrape_ips.empty:
-                st.dataframe(scrape_ips.rename(columns={'ip':'IP Đối thủ', 'count':'Số trang bị copy'}), width='stretch', height=250)
+                scrape_display = scrape_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Cào Data', 'count':'Trang bị copy'})
+                scrape_display.index = range(1, len(scrape_display) + 1)
+                st.dataframe(scrape_display, width='stretch', height=250)
             else:
                 st.success("Tài sản Dữ liệu an toàn.")
 
-if not is_paused:
-    time.sleep(1)
-    st.rerun()
+time.sleep(1)
+st.rerun()
