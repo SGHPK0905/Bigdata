@@ -77,6 +77,7 @@ if not df.empty:
             display_df.index = range(1, len(display_df) + 1)
             st.dataframe(display_df, width='stretch', height=350)
 
+    chart_col1, chart_col2 = st.columns([2, 1])
     with chart_col1:
         if 'time' in df.columns:
             time_df = df.dropna(subset=['time']).copy()
