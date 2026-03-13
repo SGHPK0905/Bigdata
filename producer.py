@@ -4,71 +4,65 @@ import random
 from kafka import KafkaProducer
 from datetime import datetime
 
-print("⏳ Khởi động hệ thống giả lập Traffic thực tế...")
-
 producer = KafkaProducer(
     bootstrap_servers=['localhost:9092'], 
     value_serializer=lambda x: json.dumps(x).encode('utf-8')
 )
 
-urls = ["/home", "/products", "/contact", "/login", "/api/data", "/about"]
+normal_urls = ["/home", "/products", "/contact", "/cart", "/checkout", "/about"]
+vuln_urls = ["/admin", "/.env", "/config.php", "/wp-login.php", "/backup.zip"]
 
 def generate_ip():
     return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
 
-print("🚀 Bắt đầu phát sóng mạng...")
-
-attack_active = False
-attack_end_time = 0
-next_attack_time = time.time() + random.randint(10, 30) 
-current_botnet = []
+current_scenario = "NORMAL"
+scenario_end_time = 0
+target_ip = ""
 
 while True:
     try:
         current_time = time.time()
 
-        if not attack_active and current_time >= next_attack_time:
-            attack_active = True
-            
-            duration = random.randint(5, 20)
-            attack_end_time = current_time + duration
-            botnet_size = random.randint(5, 255)
-            current_botnet = [generate_ip() for _ in range(botnet_size)]
-            
-            print(f"\n🔥 [BÁO ĐỘNG] BẮT ĐẦU TẤN CÔNG! Kéo dài: {duration}s | Quân số Botnet: {botnet_size} IPs")
+        if current_time >= scenario_end_time:
+            rand_val = random.random()
+            if rand_val < 0.7:
+                current_scenario = "NORMAL"
+                scenario_end_time = current_time + random.randint(10, 30)
+            elif rand_val < 0.8:
+                current_scenario = "BRUTE_FORCE"
+                target_ip = generate_ip()
+                scenario_end_time = current_time + random.randint(5, 10)
+            elif rand_val < 0.9:
+                current_scenario = "VULN_SCAN"
+                target_ip = generate_ip()
+                scenario_end_time = current_time + random.randint(5, 10)
+            else:
+                current_scenario = "WEB_SCRAPER"
+                target_ip = generate_ip()
+                scenario_end_time = current_time + random.randint(5, 10)
 
-        if attack_active and current_time > attack_end_time:
-            attack_active = False
-            
-            next_attack_time = current_time + random.randint(15, 60)
-            print(f"\n✅ [THÔNG BÁO] ĐÃ YÊN BÌNH. Chờ đợt sóng tiếp theo...")
-
-        if attack_active:
-            log = {
-                "ip": random.choice(current_botnet),
-                "url": "/login",
-                "method": "POST",
-                "status": 401,
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-        
-            sleep_time = random.uniform(0.005, 0.02) 
-            
+        if current_scenario == "BRUTE_FORCE":
+            log = {"ip": target_ip, "url": "/login", "method": "POST", "status": 401, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+            sleep_time = random.uniform(0.01, 0.05)
+        elif current_scenario == "VULN_SCAN":
+            log = {"ip": target_ip, "url": random.choice(vuln_urls), "method": "GET", "status": 404, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+            sleep_time = random.uniform(0.01, 0.05)
+        elif current_scenario == "WEB_SCRAPER":
+            log = {"ip": target_ip, "url": "/products", "method": "GET", "status": 200, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+            sleep_time = random.uniform(0.005, 0.02)
         else:
             log = {
                 "ip": generate_ip(),
-                "url": random.choices(urls, weights=[40, 30, 10, 5, 10, 5])[0], 
-                "method": "GET" if random.choice([True, False]) else "POST",
-                "status": random.choices([200, 404, 500, 401], weights=[85, 10, 2, 3])[0], 
+                "url": random.choices(normal_urls, weights=[40, 30, 10, 10, 5, 5])[0], 
+                "method": "GET",
+                "status": random.choices([200, 404, 500], weights=[90, 8, 2])[0], 
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            sleep_time = random.uniform(0.05, 0.8)
-            
+            sleep_time = random.uniform(0.05, 0.5)
+
         producer.send('web-logs', value=log)
-        
-        print(f"📡 [Log] {log['ip']} -> {log['url']} ({log['status']})")
-        
+        print(f"{log['ip']} - {log['status']} - {log['url']}")
         time.sleep(sleep_time)
         
-    except Exception as e:
+    except:
         pass
