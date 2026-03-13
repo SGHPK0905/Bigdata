@@ -32,7 +32,7 @@ while True:
             
             duration = random.randint(5, 20)
             attack_end_time = current_time + duration
-            botnet_size = random.randint(5, 555)
+            botnet_size = random.randint(5, 255)
             current_botnet = [generate_ip() for _ in range(botnet_size)]
             
             print(f"\n🔥 [BÁO ĐỘNG] BẮT ĐẦU TẤN CÔNG! Kéo dài: {duration}s | Quân số Botnet: {botnet_size} IPs")
