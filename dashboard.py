@@ -42,6 +42,13 @@ if list_of_files:
 df = st.session_state.last_valid_df
 attack_ips = len(st.session_state.blacklisted_ips)
 
+col_title, col_toggle = st.columns([3, 1])
+with col_title:
+    st.write("")
+with col_toggle:
+    st.write("")
+    is_paused = st.toggle("⏸️ TẠM DỪNG ĐỂ PHÂN TÍCH (PAUSE)", value=False)
+
 if not df.empty:
     col1, col2, col3, col4 = st.columns(4)
     col1.markdown(f'<div class="kpi-box"><div class="kpi-title">Traffic</div><div class="kpi-value">{len(df)}</div></div>', unsafe_allow_html=True)
@@ -90,13 +97,15 @@ if not df.empty:
             trend = recent_df.groupby('time_sec').size().reset_index(name='Requests')
             
             fig_line = px.area(trend, x='time_sec', y='Requests', template="plotly_dark")
+            
             fig_line.update_layout(
-                xaxis=dict(range=[start_time, latest_time], fixedrange=True),
-                yaxis=dict(fixedrange=True),
+                xaxis=dict(range=[start_time, latest_time], fixedrange=False), 
+                yaxis=dict(fixedrange=False),
                 paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10}
             )
             fig_line.update_traces(mode='lines+markers', marker=dict(size=4), fillcolor='rgba(14, 165, 233, 0.2)')
-            st.plotly_chart(fig_line, width='stretch', key="line", config={'displayModeBar': False})
+            
+            st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
 
     with chart_col2:
         status_dist = df.groupby('status').size().reset_index(name='count')
@@ -128,5 +137,6 @@ if not df.empty:
         fig_gauge.update_layout(uirevision='gauge_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":20, "b":20, "l":20, "r":20}, font={'color': "white"})
         st.plotly_chart(fig_gauge, width='stretch', key="gauge")
 
-time.sleep(1)
-st.rerun()
+if not is_paused:
+    time.sleep(1)
+    st.rerun()
