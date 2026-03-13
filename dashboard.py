@@ -65,7 +65,7 @@ if not df.empty:
             map_data = st.session_state.blacklisted_ips.copy()
             map_data['lat'], map_data['lon'] = zip(*map_data['ip'].apply(get_lat_lon))
             fig_map = px.scatter_geo(map_data, lat='lat', lon='lon', size='count', color='count', color_continuous_scale="Reds", projection="natural earth", size_max=25)
-            fig_map.update_layout(uirevision=1, margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a', showcountries=True, countrycolor='#334155'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
+            fig_map.update_layout(uirevision='map_lock', margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a', showcountries=True, countrycolor='#334155'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
             st.plotly_chart(fig_map, width='stretch', key="map")
         else:
             st.info("No threats detected.")
@@ -84,26 +84,41 @@ if not df.empty:
             time_df['time_sec'] = time_df['time'].dt.floor('s') 
             trend = time_df.groupby('time_sec').size().reset_index(name='Requests')
             fig_line = px.area(trend, x='time_sec', y='Requests', template="plotly_dark")
-            fig_line.update_layout(uirevision=1, xaxis=dict(rangeslider=dict(visible=True)), yaxis=dict(fixedrange=False), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10})
+            fig_line.update_layout(uirevision='line_lock', xaxis=dict(rangeslider=dict(visible=True)), yaxis=dict(fixedrange=False), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10})
             st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
 
     with chart_col2:
         status_dist = df.groupby('status').size().reset_index(name='count')
         status_dist['status'] = status_dist['status'].astype(str)
         fig_pie = px.pie(status_dist, values='count', names='status', hole=0.5, template="plotly_dark")
-        fig_pie.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10})
+        fig_pie.update_layout(uirevision='pie_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10})
         st.plotly_chart(fig_pie, width='stretch', key="pie")
 
     c3, c4 = st.columns([2, 1])
     with c3:
         url_dist = df.groupby('url').size().reset_index(name='count').sort_values(by='count')
         fig_bar = px.bar(url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Blues", template="plotly_dark")
-        fig_bar.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False, margin={"t":10})
+        fig_bar.update_layout(uirevision='bar_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False, margin={"t":10})
         st.plotly_chart(fig_bar, width='stretch', key="bar")
 
     with c4:
-        fig_gauge = go.Figure(go.Indicator(mode="gauge+number", value=attack_ips, gauge={'axis': {'range': [0, 150]}, 'bar': {'color': "#ef4444"}}))
-        fig_gauge.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":20, "b":20, "l":20, "r":20}, font={'color': "white"})
+     
+        max_gauge_val = max(150, attack_ips + 50)
+        
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number", 
+            value=attack_ips, 
+            gauge={
+                'axis': {'range': [0, max_gauge_val]}, 
+                'bar': {'color': "#ef4444"},
+                'steps': [
+                    {'range': [0, max_gauge_val * 0.3], 'color': "#064e3b"},
+                    {'range': [max_gauge_val * 0.3, max_gauge_val * 0.7], 'color': "#b45309"},
+                    {'range': [max_gauge_val * 0.7, max_gauge_val], 'color': "#7f1d1d"}
+                ]
+            }
+        ))
+        fig_gauge.update_layout(uirevision='gauge_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":20, "b":20, "l":20, "r":20}, font={'color': "white"})
         st.plotly_chart(fig_gauge, width='stretch', key="gauge")
 
 time.sleep(1)
