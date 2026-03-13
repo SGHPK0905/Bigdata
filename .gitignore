@@ -1,6 +1,6 @@
 
 ket_qua_output/
-checkpoint_dir/
+my_checkpoint/
 .checkpoint/
 
 *.crc
