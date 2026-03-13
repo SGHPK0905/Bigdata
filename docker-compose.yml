@@ -28,7 +28,7 @@ services:
       - "7077:7077"
     volumes:
       - ./:/app
-    dns:               # <--- MỚI THÊM: Giúp Docker vào mạng ổn định
+    dns:
       - 8.8.8.8
       - 8.8.4.4
 
@@ -42,5 +42,5 @@ services:
       SPARK_WORKER_MEMORY: 1g
     volumes:
       - ./:/app
-    dns:               # <--- MỚI THÊM
+    dns:
       - 8.8.8.8
