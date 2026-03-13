@@ -40,12 +40,13 @@ if list_of_files:
         pass 
 
 df = st.session_state.last_valid_df
+attack_ips = len(st.session_state.blacklisted_ips)
 
 if not df.empty:
     col1, col2, col3, col4 = st.columns(4)
     col1.markdown(f'<div class="kpi-box"><div class="kpi-title">Traffic</div><div class="kpi-value">{len(df)}</div></div>', unsafe_allow_html=True)
     col2.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Errors 401</div><div class="kpi-value" style="color:#f87171;">{len(df[df["status"] == 401])}</div></div>', unsafe_allow_html=True)
-    col3.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Blocked</div><div class="kpi-value" style="color:#ef4444;">{len(st.session_state.blacklisted_ips)}</div></div>', unsafe_allow_html=True)
+    col3.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Blocked</div><div class="kpi-value" style="color:#ef4444;">{attack_ips}</div></div>', unsafe_allow_html=True)
     col4.markdown(f'<div class="kpi-box"><div class="kpi-title">Time</div><div class="kpi-value" style="font-size:24px;">{time.strftime("%H:%M:%S")}</div></div>', unsafe_allow_html=True)
     
     st.write("")
@@ -56,6 +57,7 @@ if not df.empty:
         hackers = hacker_ips[hacker_ips['count'] > 10]
         if not hackers.empty:
             st.session_state.blacklisted_ips = pd.concat([st.session_state.blacklisted_ips, hackers]).drop_duplicates(subset=['ip'], keep='last')
+            attack_ips = len(st.session_state.blacklisted_ips)
 
     map_col, table_col = st.columns([2, 1])
     with map_col:
@@ -64,7 +66,7 @@ if not df.empty:
             map_data['lat'], map_data['lon'] = zip(*map_data['ip'].apply(get_lat_lon))
             fig_map = px.scatter_geo(map_data, lat='lat', lon='lon', size='count', color='count', color_continuous_scale="Reds", projection="natural earth", size_max=25)
             fig_map.update_layout(uirevision=1, margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a', showcountries=True, countrycolor='#334155'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
-            st.plotly_chart(fig_map, use_container_width=True, key="map")
+            st.plotly_chart(fig_map, width='stretch', key="map")
         else:
             st.info("No threats detected.")
 
@@ -73,7 +75,7 @@ if not df.empty:
             display_df = st.session_state.blacklisted_ips.sort_values(by='count', ascending=False).head(10)
             display_df.columns = ['Attacker IP', 'Attempts']
             display_df.index = range(1, len(display_df) + 1)
-            st.dataframe(display_df, use_container_width=True, height=350)
+            st.dataframe(display_df, width='stretch', height=350)
 
     chart_col1, chart_col2 = st.columns([2, 1])
     with chart_col1:
@@ -83,26 +85,26 @@ if not df.empty:
             trend = time_df.groupby('time_sec').size().reset_index(name='Requests')
             fig_line = px.area(trend, x='time_sec', y='Requests', template="plotly_dark")
             fig_line.update_layout(uirevision=1, xaxis=dict(rangeslider=dict(visible=True)), yaxis=dict(fixedrange=False), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10})
-            st.plotly_chart(fig_line, use_container_width=True, key="line", config={'scrollZoom': True, 'displayModeBar': True})
+            st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
 
     with chart_col2:
         status_dist = df.groupby('status').size().reset_index(name='count')
         status_dist['status'] = status_dist['status'].astype(str)
         fig_pie = px.pie(status_dist, values='count', names='status', hole=0.5, template="plotly_dark")
         fig_pie.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10})
-        st.plotly_chart(fig_pie, use_container_width=True, key="pie")
+        st.plotly_chart(fig_pie, width='stretch', key="pie")
 
     c3, c4 = st.columns([2, 1])
     with c3:
         url_dist = df.groupby('url').size().reset_index(name='count').sort_values(by='count')
         fig_bar = px.bar(url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Blues", template="plotly_dark")
         fig_bar.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False, margin={"t":10})
-        st.plotly_chart(fig_bar, use_container_width=True, key="bar")
+        st.plotly_chart(fig_bar, width='stretch', key="bar")
 
     with c4:
         fig_gauge = go.Figure(go.Indicator(mode="gauge+number", value=attack_ips, gauge={'axis': {'range': [0, 150]}, 'bar': {'color': "#ef4444"}}))
         fig_gauge.update_layout(uirevision=1, paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":20, "b":20, "l":20, "r":20}, font={'color': "white"})
-        st.plotly_chart(fig_gauge, use_container_width=True, key="gauge")
+        st.plotly_chart(fig_gauge, width='stretch', key="gauge")
 
-time.sleep(2)
+time.sleep(1)
 st.rerun()
