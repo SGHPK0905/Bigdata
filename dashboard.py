@@ -165,12 +165,16 @@ if not df.empty:
                 else: st.info("Không phát hiện Rà quét lỗ hổng.")
             
             st.markdown("<h5 style='color: #e2e8f0; margin-top:20px;'>🎯 TOP ĐƯỜNG DẪN BỊ NHẮM TỚI (CỦA HACKER)</h5>", unsafe_allow_html=True)
-            hacker_target_df = df[df['status'].isin([401, 404])]
+            hacker_ips_list = pd.concat([brute_ips['ip'], scan_ips['ip']]).unique()
+            hacker_target_df = df[df['ip'].isin(hacker_ips_list) & df['status'].isin([401, 404])]
+            
             if not hacker_target_df.empty:
                 url_dist = hacker_target_df.groupby('url').size().reset_index(name='count').sort_values(by='count')
                 fig_bar = px.bar(url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Reds", template="plotly_dark")
                 fig_bar.update_layout(uirevision='bar_lock_soc', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False, margin={"t":10}, xaxis_title="", yaxis_title="")
                 st.plotly_chart(fig_bar, width='stretch', key="bar_soc")
+            else:
+                st.success("Hệ thống an toàn. Chưa phát hiện mục tiêu bị tấn công.")
 
         with soc_t3:
             st.markdown("<h5 style='color: #e2e8f0;'>🤖 DANH SÁCH BOT CÀO DỮ LIỆU ĐỐI THỦ</h5>", unsafe_allow_html=True)
