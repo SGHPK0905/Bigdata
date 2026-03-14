@@ -1,0 +1,166 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{tocloft}
+
+\geometry{a4paper, left=3cm, right=2cm, top=2cm, bottom=2cm}
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-50pt}{40pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,      
+    urlcolor=blue,
+    pdftitle={Báo cáo Đồ án Big Data - SOC},
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\Large ĐẠI HỌC SÀI GÒN} \\[0.5cm]
+        \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[3cm]
+
+        \textbf{\Large BÁO CÁO ĐỒ ÁN CUỐI KÌ KẾT THÚC HỌC PHẦN} \\[0.5cm]
+        \textbf{\large Bộ Môn: Xử lý dữ liệu lớn (Big Data)} \\[2cm]
+
+        {\LARGE \textbf{CHỦ ĐỀ: XÂY DỰNG HỆ THỐNG SOC PHÂN TÍCH DỮ LIỆU LỚN VỚI KAFKA VÀ SPARK}}\\[3cm]
+
+        \begin{flushleft}
+            \large
+            \textbf{Giảng viên:} Vũ Ngọc Thanh Sang \\[0.5cm]
+            \textbf{Sinh Viên:} Nguyễn Trương Cao Sơn \\[0.5cm]
+            \textbf{Lớp:} DDU1231 
+        \end{flushleft}
+
+        \vfill
+        {\large TP Hồ Chí Minh, năm 2024}
+    \end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\tableofcontents
+\newpage
+
+\listoffigures
+\newpage
+
+\pagenumbering{arabic}
+
+\chapter*{LỜI MỞ ĐẦU}
+\addcontentsline{toc}{chapter}{LỜI MỞ ĐẦU}
+(Viết lời mở đầu ở đây...)
+
+\newpage
+
+\chapter{TỔNG QUAN VỀ ĐỀ TÀI}
+
+\section{Giới thiệu về đề tài}
+\subsection{Bối cảnh nghiên cứu}
+(Nội dung...)
+
+\subsection{Lý do chọn đề tài}
+(Nội dung...)
+
+\section{Mục tiêu và phạm vi nghiên cứu}
+\subsection{Mục tiêu nghiên cứu}
+(Nội dung...)
+
+\subsection{Phạm vi giới hạn của đồ án}
+(Nội dung...)
+
+\section{Ý nghĩa thực tiễn}
+(Nội dung...)
+
+\chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG NGHỆ}
+
+\section{Khái quát về Xử lý dữ liệu lớn (Big Data)}
+\subsection{Đặc trưng của dữ liệu lớn (Mô hình 3V/5V)}
+(Nội dung...)
+
+\subsection{Xử lý theo lô (Batch) và Xử lý luồng (Stream Processing)}
+(Nội dung...)
+
+\section{Nền tảng phân phối thông điệp Apache Kafka}
+\subsection{Kiến trúc tổng quan của Kafka}
+(Nội dung...)
+
+\subsection{Cơ chế lưu trữ và hoạt động (Topic, Partition)}
+(Nội dung...)
+
+\section{Khung tính toán phân tán Apache Spark}
+\subsection{Giới thiệu về Apache Spark và xử lý In-Memory}
+(Nội dung...)
+
+\subsection{Mô hình Spark Structured Streaming}
+(Nội dung...)
+
+\section{Ứng dụng trong An toàn thông tin (Hệ thống SIEM)}
+\subsection{Khái niệm về hệ thống SIEM}
+(Nội dung...)
+
+\subsection{Kỹ thuật tấn công Brute Force và cơ chế phát hiện}
+(Nội dung...)
+
+\chapter{ỨNG DỤNG VÀ TRIỂN KHAI BÀI TOÁN THỰC TẾ}
+
+\section{Phương pháp nghiên cứu và kiến trúc hệ thống}
+\subsection{Sơ đồ khối kiến trúc tổng thể}
+(Nội dung...)
+
+\subsection{Lựa chọn công nghệ triển khai (Docker Containerization)}
+(Nội dung...)
+
+\section{Thu thập và giả lập dữ liệu (Data Ingestion)}
+\subsection{Xây dựng kịch bản mạng Botnet tấn công}
+(Nội dung...)
+
+\subsection{Cấu hình Kafka Producer}
+(Nội dung...)
+
+\section{Xử lý và phân tích dữ liệu (Data Processing)}
+\subsection{Xử lý luồng dữ liệu với Spark Structured Streaming}
+(Nội dung...)
+
+\subsection{Thuật toán phát hiện bất thường và trích xuất Blacklist}
+(Nội dung...)
+
+\chapter{KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}
+
+\section{Kết quả chạy thực nghiệm}
+\subsection{Giao diện sinh dữ liệu log}
+(Nội dung...)
+
+\subsection{Bảng cảnh báo thời gian thực và File kết quả}
+(Nội dung...)
+
+\section{Đưa ra nhận xét và đánh giá}
+\subsection{Ưu điểm của hệ thống}
+(Nội dung...)
+
+\subsection{Hạn chế và hướng phát triển}
+(Nội dung...)
+
+\chapter*{KẾT LUẬN}
+\addcontentsline{toc}{chapter}{KẾT LUẬN}
+(Nội dung kết luận...)
+
+\chapter*{LỜI CẢM ƠN}
+\addcontentsline{toc}{chapter}{LỜI CẢM ƠN}
+(Nội dung lời cảm ơn...)
+
+\chapter*{TÀI LIỆU THAM KHẢO}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+(Liệt kê tài liệu...)
+
+\end{document}
