@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  19 MAR 2026 01:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  19 MAR 2026 02:02
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -802,7 +802,7 @@ Package hyperref Info: Link coloring ON on input line 29.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 \c@lstlisting=\count339
-<logo.png, id=186, 289.08pt x 290.0436pt>
+<logo.png, id=194, 289.08pt x 290.0436pt>
 File: logo.png Graphic file (type png)
 <use logo.png>
 Package pdftex.def Info: logo.png  used on input line 50.
@@ -841,7 +841,7 @@ Ch\uhorn \ohorn ng 2.
 
 ] [7] [8]
 Ch\uhorn \ohorn ng 3.
-<sodokientruc.png, id=288, 686.565pt x 208.52907pt>
+<sodokientruc.png, id=315, 686.565pt x 208.52907pt>
 File: sodokientruc.png Graphic file (type png)
 <use sodokientruc.png>
 Package pdftex.def Info: sodokientruc.png  used on input line 235.
@@ -859,41 +859,77 @@ LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `T5/cmtt/m/n' tried instead on input line 332.
  [12] [13]
 Ch\uhorn \ohorn ng 4.
+<cmd.png, id=368, 1444.64719pt x 776.14969pt>
+File: cmd.png Graphic file (type png)
+<use cmd.png>
+Package pdftex.def Info: cmd.png  used on input line 377.
+(pdftex.def)             Requested size: 409.71692pt x 220.11539pt.
 [14
 
-] [15
+ <./cmd.png>]
+<menudb.png, id=374, 1307.63531pt x 290.58563pt>
+File: menudb.png Graphic file (type png)
+<use menudb.png>
+Package pdftex.def Info: menudb.png  used on input line 386.
+(pdftex.def)             Requested size: 409.71692pt x 91.04721pt.
+<mapdb.png, id=375, 1310.64656pt x 542.77782pt>
+File: mapdb.png Graphic file (type png)
+<use mapdb.png>
+Package pdftex.def Info: mapdb.png  used on input line 394.
+(pdftex.def)             Requested size: 409.71692pt x 169.67561pt.
+<statusdb.png, id=376, 1303.87125pt x 515.67656pt>
+File: statusdb.png Graphic file (type png)
+<use statusdb.png>
+Package pdftex.def Info: statusdb.png  used on input line 404.
+(pdftex.def)             Requested size: 409.71692pt x 162.03767pt.
+ [15 <./menudb.png> <./mapdb.png>]
+<401404.png, id=384, 1320.43312pt x 358.33875pt>
+File: 401404.png Graphic file (type png)
+<use 401404.png>
+Package pdftex.def Info: 401404.png  used on input line 416.
+(pdftex.def)             Requested size: 409.71692pt x 111.18774pt.
+<link.png, id=385, 1276.01718pt x 439.6425pt>
+File: link.png Graphic file (type png)
+<use link.png>
+Package pdftex.def Info: link.png  used on input line 424.
+(pdftex.def)             Requested size: 409.71692pt x 141.16476pt.
+ [16 <./statusdb.png> <./401404.png>]
+<scratt.png, id=392, 1303.11844pt x 517.18219pt>
+File: scratt.png Graphic file (type png)
+<use scratt.png>
+Package pdftex.def Info: scratt.png  used on input line 433.
+(pdftex.def)             Requested size: 409.71692pt x 162.60547pt.
+<bidb.png, id=393, 1315.91624pt x 614.295pt>
+File: bidb.png Graphic file (type png)
+<use bidb.png>
+Package pdftex.def Info: bidb.png  used on input line 444.
+(pdftex.def)             Requested size: 409.71692pt x 191.2637pt.
+ [17 <./link.png> <./scratt.png>] [18 <./bidb.png>] [19
 
-] [16
+] [20
 
-] [17
+] [21
 
 ] (report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-
-
-Package rerunfilecheck Warning: File `report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `report.out':
-(rerunfilecheck)             Before: DC6D8331F9CD302CD19F3BD622C1F802;11020
-(rerunfilecheck)             After:  6C00BDC05811D783E0147D144D32E648;11432.
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: AF0A13CC36FF1359A0F4BDC6830513EE;12385.
  ) 
 Here is how much of TeX's memory you used:
- 23784 strings out of 467867
- 434362 string characters out of 5416882
- 1174908 words of memory out of 5000000
- 52218 multiletter control sequences out of 15000+600000
+ 23855 strings out of 467867
+ 435394 string characters out of 5416882
+ 1174974 words of memory out of 5000000
+ 52276 multiletter control sequences out of 15000+600000
  642158 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,10n,104p,815b,2159s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\GIGABYTE\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on report.pdf (21 pages, 392030 bytes).
+Output written on report.pdf (25 pages, 1025744 bytes).
 PDF statistics:
- 403 PDF objects out of 1000 (max. 8388607)
- 95 named destinations out of 1000 (max. 500000)
- 383 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 464 PDF objects out of 1000 (max. 8388607)
+ 108 named destinations out of 1000 (max. 500000)
+ 439 words of extra memory for PDF output out of 10000 (max. 10000000)
 

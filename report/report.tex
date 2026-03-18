@@ -365,19 +365,93 @@ Thông qua việc kết hợp các phép toán xử lý luồng tại Spark và 
 % ---------------- CHƯƠNG IV ----------------
 \chapter{KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}
 
-\section{Kết quả chạy thực nghiệm}
-\subsection{Giao diện sinh dữ liệu log}
-(Nội dung...)
+Chương này trình bày chi tiết các kết quả đạt được trong quá trình vận hành thực nghiệm hệ thống. Nội dung được tổ chức theo luồng xử lý thực tế, bắt đầu từ khâu khởi chạy nền tảng, tiếp nhận dữ liệu thô, cho đến quá trình trực quan hóa trên bảng điều khiển trung tâm và trích xuất các thông tin phục vụ an ninh mạng cũng như phân tích nghiệp vụ.
 
-\subsection{Bảng cảnh báo thời gian thực và File kết quả}
-(Nội dung...)
+\section{Khởi chạy hệ thống và tiếp nhận luồng dữ liệu}
+Quá trình thực nghiệm bắt đầu bằng việc kích hoạt toàn bộ cụm dịch vụ thông qua công cụ điều phối tự động. Ngay sau khi khởi động, trạm trung chuyển Kafka và cụm tính toán Spark lập tức thiết lập trạng thái kết nối thông suốt. 
 
-\section{Đưa ra nhận xét và đánh giá}
-\subsection{Ưu điểm của hệ thống}
-(Nội dung...)
+Tại phân hệ sinh dữ liệu, kịch bản Python tiến hành bơm liên tục hàng ngàn bản ghi nhật ký giả lập vào hệ thống. Giao diện dòng lệnh ghi nhận rõ hai tiến trình hoạt động song song: một tiến trình liên tục xuất ra các bản ghi truy cập đa dạng về mã trạng thái; tiến trình còn lại thể hiện cụm Spark đang tiếp nhận, chia dữ liệu thành các lô nhỏ và ghi thành công vào phân vùng Hồ dữ liệu. Toàn bộ chuỗi cung ứng diễn ra tự động và ổn định, không ghi nhận hiện tượng nghẽn tải.
 
-\subsection{Hạn chế và hướng phát triển}
-(Nội dung...)
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{cmd.png}
+    \caption{Tiến trình sinh dữ liệu (trái) và tiến trình Spark ghi nhận lô nhỏ vào Hồ dữ liệu (phải)}
+\end{figure}
+
+\section{Giám sát tổng quan tại Trung tâm Điều hành An ninh}
+Dữ liệu sau khi được xử lý và lưu trữ sẽ được trực quan hóa thông qua Bảng điều khiển trung tâm. Đây là giao diện phục vụ trực tiếp cho công tác giám sát an ninh mạng với tần suất cập nhật liên tục.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{menudb.png}
+    \caption{Các chỉ số an ninh trọng yếu tại Bảng điều khiển trung tâm}
+\end{figure}
+
+Ngay tại màn hình chính, hệ thống cung cấp các chỉ số đo lường hiệu suất trọng yếu theo thời gian thực. Trong phiên thử nghiệm cường độ cao, hệ thống tiếp nhận tổng cộng 9120 yêu cầu truy cập. Dựa trên bộ luật đã thiết lập, thuật toán phát hiện bất thường lập tức nhận diện và cô lập thành công 9 địa chỉ IP thực hiện tấn công dò đoán mật khẩu (mã 401), 5 địa chỉ IP rà quét lỗ hổng (mã 404) và 7 địa chỉ IP có hành vi thu thập dữ liệu tự động (mã 200 tần suất cao). Tổng cộng có 21 địa chỉ IP độc hại bị hệ thống tự động đưa vào danh sách chặn.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{mapdb.png}
+    \caption{Bản đồ định vị các mối đe dọa và mức độ rủi ro hệ thống}
+\end{figure}
+
+Giao diện tiếp tục cung cấp bản đồ phân bổ địa lý của các nguồn truy cập độc hại, kết hợp cùng biểu đồ đo lường mức độ rủi ro hệ thống đang ở mức cảnh báo cao.
+
+Khi quan sát biểu đồ diễn biến lưu lượng, hệ thống ghi nhận một đợt tăng vọt đột biến về số lượng yêu cầu truy cập chỉ trong vòng 60 giây. Sự bùng nổ này được đối chiếu trực tiếp với biểu đồ phân bổ mã trạng thái, xác nhận tỷ lệ lỗi xác thực 401 chiếm 18.4\% và lỗi không tìm thấy tài nguyên 404 chiếm 18.5\%. Sự gia tăng bất thường của các nhóm lỗi này bên cạnh 62.6\% lưu lượng hợp lệ là bằng chứng rõ nét của một đợt tấn công từ mạng máy tính ma.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{statusdb.png}
+    \caption{Phân tích tương quan giữa lưu lượng đột biến và phân bổ mã trạng thái}
+\end{figure}
+
+\section{Phân tích chuyên sâu các sự kiện an toàn thông tin}
+Từ các dấu hiệu bất thường trên biểu đồ tổng quan, hệ thống tiến hành bóc tách dữ liệu để làm rõ chi tiết từng nhóm đối tượng vi phạm, cung cấp cơ sở kỹ thuật để xử lý sự cố.
+
+\subsection{Truy vết hành vi xâm nhập và dò quét lỗ hổng}
+Hệ thống truy xuất và xếp hạng mức độ nguy hiểm của từng địa chỉ IP cụ thể. Bảng dữ liệu liệt kê chính xác các địa chỉ IP tạo ra hàng trăm lượt truy cập lỗi trong một thời gian cực ngắn (nhiều địa chỉ ghi nhận xấp xỉ 300 lượt vi phạm). Dữ liệu này hoàn toàn khớp với đặc điểm của hình thức tấn công dò đoán mật khẩu tự động.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{401404.png}
+    \caption{Danh sách chi tiết các địa chỉ IP thực hiện hành vi xâm nhập trái phép}
+\end{figure}
+
+Bên cạnh đó, hệ thống bóc tách các mục tiêu bị nhắm tới nhiều nhất. Kết quả cho thấy đường dẫn đăng nhập quản trị (\texttt{/login}) là mục tiêu chịu áp lực tấn công áp đảo. Các đường dẫn nhạy cảm chứa mã nguồn và tệp tin hệ thống (\texttt{/wp-login.php}, \texttt{/.env}, \texttt{/backup.zip}) cũng liên tục bị rà quét. Đây là thông tin quan trọng giúp đội ngũ quản trị kịp thời thiết lập các bộ lọc trên tường lửa.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{link.png}
+    \caption{Thống kê các đường dẫn hệ thống bị tin tặc nhắm mục tiêu nhiều nhất}
+\end{figure}
+
+\subsection{Nhận diện công cụ thu thập dữ liệu tự động}
+Không chỉ dừng lại ở các lỗi bảo mật nghiêm trọng, hệ thống còn thể hiện năng lực phát hiện các hành vi tinh vi ẩn mình dưới vỏ bọc truy cập hợp lệ. Thuật toán nhận diện được hàng loạt địa chỉ IP có tần suất tải trang thành công vượt xa giới hạn vật lý của người dùng thực (từ 500 đến hơn 700 lượt). Việc đối chiếu đường dẫn xác nhận toàn bộ lưu lượng này chỉ tập trung vào danh mục sản phẩm (\texttt{/products}), qua đó kết luận đây là các công cụ thu thập dữ liệu tự động của đối thủ cạnh tranh.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{scratt.png}
+    \caption{Danh sách công cụ thu thập tự động và đường dẫn bị khai thác}
+\end{figure}
+
+\section{Ứng dụng phân tích Trí tuệ Doanh nghiệp (BI)}
+Một trong những điểm nhấn của kiến trúc hệ thống là khả năng tận dụng chính luồng dữ liệu nhật ký bảo mật để phục vụ phân tích kinh doanh. Tại phân hệ BI, hệ thống tự động lọc bỏ toàn bộ các địa chỉ IP thuộc danh sách chặn, trả lại một tập dữ liệu sạch phản ánh đúng hành vi của người dùng hợp lệ.
+
+Tập dữ liệu này được định lượng thành các chỉ số kinh doanh thực tế bao gồm: 1513 lượt truy cập trang chủ, 1077 lượt xem sản phẩm, 398 lượt thêm giỏ hàng, và 157 lượt thanh toán thành công. Dựa trên các chỉ số này, biểu đồ phễu chuyển đổi hành vi được hình thành, xác định tỷ lệ chuyển đổi cuối cùng đạt mức 10.38\%. Việc cung cấp các báo cáo định hướng kinh doanh ngay trên nền tảng giám sát an ninh là minh chứng cho tính đa dụng của kiến trúc dữ liệu phân tán.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bidb.png}
+    \caption{Phân hệ phân tích kinh doanh minh họa biểu đồ phễu chuyển đổi}
+\end{figure}
+
+\section{Đánh giá hiệu năng và kiến trúc hệ thống}
+Dựa trên các kết quả trực quan thu được, kiến trúc được đề xuất trong đồ án đã chứng minh được tính hiệu quả và sự ổn định:
+\begin{itemize}
+    \item \textbf{Năng lực đáp ứng thời gian thực:} Việc kết hợp cơ chế chia lô nhỏ của Spark Streaming cùng trạm trung chuyển Kafka giúp hệ thống xử lý nhanh chóng hàng ngàn bản ghi, phản ánh tức thời mọi biến động từ tầng nền tảng lên bảng điều khiển.
+    \item \textbf{Độ khả dụng và tính toàn vẹn:} Thiết kế tách rời hoàn toàn giữa khâu xử lý lưu trữ và khâu trực quan hóa giúp hệ thống hoạt động bền bỉ. Mọi sự kiện an ninh đều được ghi nhận nguyên vẹn xuống Hồ dữ liệu, không bị phụ thuộc vào trạng thái hoạt động của giao diện web.
+    \item \textbf{Tối ưu hóa giá trị dữ liệu:} Thay vì chỉ sử dụng nhật ký hệ thống làm công cụ rà soát lỗi đơn thuần, đồ án đã chuyển hóa luồng thông tin này thành một tài sản đa dụng, vừa đóng vai trò làm lá chắn an ninh, vừa trực tiếp hỗ trợ chiến lược phát triển kinh doanh.
+\end{itemize}
 
 \chapter*{KẾT LUẬN}
 \addcontentsline{toc}{chapter}{KẾT LUẬN}

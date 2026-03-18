@@ -36,12 +36,13 @@
 \contentsline {subsection}{\numberline {3.3.2}Cơ chế xử lý lô nhỏ và lưu trữ Hồ dữ liệu (Micro-batching)}{12}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Thuật toán phân tích và phát hiện bất thường}{12}{subsection.3.3.3}%
 \contentsline {chapter}{\numberline {4}KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}{14}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Kết quả chạy thực nghiệm}{14}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Giao diện sinh dữ liệu log}{14}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Bảng cảnh báo thời gian thực và File kết quả}{14}{subsection.4.1.2}%
-\contentsline {section}{\numberline {4.2}Đưa ra nhận xét và đánh giá}{14}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Ưu điểm của hệ thống}{14}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Hạn chế và hướng phát triển}{14}{subsection.4.2.2}%
-\contentsline {chapter}{KẾT LUẬN}{15}{chapter*.2}%
-\contentsline {chapter}{LỜI CẢM ƠN}{16}{chapter*.3}%
-\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{17}{chapter*.4}%
+\contentsline {section}{\numberline {4.1}Khởi chạy hệ thống và tiếp nhận luồng dữ liệu}{14}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Giám sát tổng quan tại Trung tâm Điều hành An ninh}{15}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Phân tích chuyên sâu các sự kiện an toàn thông tin}{16}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Truy vết hành vi xâm nhập và dò quét lỗ hổng}{16}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Nhận diện công cụ thu thập dữ liệu tự động}{16}{subsection.4.3.2}%
+\contentsline {section}{\numberline {4.4}Ứng dụng phân tích Trí tuệ Doanh nghiệp (BI)}{17}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Đánh giá hiệu năng và kiến trúc hệ thống}{17}{section.4.5}%
+\contentsline {chapter}{KẾT LUẬN}{19}{chapter*.2}%
+\contentsline {chapter}{LỜI CẢM ƠN}{20}{chapter*.3}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{21}{chapter*.4}%
