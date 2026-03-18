@@ -275,7 +275,7 @@ Trong môi trường thực tế, việc tích hợp nhiều nền tảng phân 
 
 Để giải quyết triệt để vấn đề này, toàn bộ kiến trúc được triển khai dựa trên nền tảng ảo hóa cấp hệ điều hành Docker \cite{docker_doc}. Giải pháp này đóng gói từng dịch vụ thành các môi trường thực thi hoàn toàn độc lập, loại bỏ rủi ro can thiệp chéo giữa các tiến trình. 
 
-Đồng thời, công cụ quản lý Docker Compose được sử dụng để định nghĩa và liên kết chuỗi dịch vụ. Thông qua một tệp cấu hình tập trung, hệ thống có thể khởi động đồng loạt từ khâu sinh dữ liệu, trung chuyển đến xử lý phân tích. Cách tiếp cận này đảm bảo tính nhất quán cao, cô lập hoàn toàn môi trường thử nghiệm và đáp ứng đúng tiêu chuẩn triển khai vi dịch vụ hiện đại.
+Đồng thời, công cụ quản lý Docker Compose được sử dụng để định nghĩa và liên kết chuỗi dịch vụ. Cụ thể, tệp cấu hình (\texttt{docker-compose.yml}) khởi tạo một cụm bao gồm: 01 nút ZooKeeper để quản lý trạng thái, 01 nút Kafka Broker làm trạm trung chuyển, và một cụm tính toán Spark bao gồm 01 nút Master điều phối cùng 01 nút Worker đảm nhiệm thực thi tác vụ. Cấu trúc này mô phỏng sát nhất với một hệ thống phân tán thực tế. Thông qua một lệnh khởi chạy duy nhất, hệ thống có thể vận hành đồng loạt từ khâu sinh dữ liệu đến xử lý phân tích.
 
 \section{Thu thập và giả lập dữ liệu}
 \subsection{Xây dựng kịch bản mạng máy tính ma tấn công}
@@ -288,28 +288,27 @@ Trong môi trường thử nghiệm, hệ thống không sử dụng máy chủ 
         \hline
         \textbf{Trường dữ liệu} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả ý nghĩa} \\
         \hline
-        \texttt{ip\_address} & String & Địa chỉ IP nguồn của máy khách thực hiện truy cập. \\
+        \texttt{ip} & String & Địa chỉ IP nguồn của máy khách thực hiện truy cập. \\
         \hline
-        \texttt{timestamp} & String & Thời gian ghi nhận sự kiện (định dạng ISO 8601). \\
+        \texttt{url} & String & Đường dẫn tài nguyên đích trên máy chủ (ví dụ: \texttt{/login}). \\
         \hline
         \texttt{method} & String & Phương thức HTTP được sử dụng (\texttt{GET}, \texttt{POST}...). \\
         \hline
-        \texttt{endpoint} & String & Đường dẫn tài nguyên đích trên máy chủ (ví dụ: \texttt{/login}). \\
+        \texttt{status} & Integer & Mã trạng thái phản hồi HTTP (ví dụ: \texttt{200}, \texttt{401}, \texttt{404}). \\
         \hline
-        \texttt{status\_code} & Integer & Mã trạng thái phản hồi HTTP (ví dụ: \texttt{200}, \texttt{401}, \texttt{404}). \\
+        \texttt{time} & String & Thời gian ghi nhận sự kiện (định dạng YYYY-MM-DD HH:MM:SS). \\
         \hline
     \end{tabular}
     \caption{Cấu trúc các trường thông tin trong bản ghi nhật ký giả lập}
     \label{tab:log_schema}
 \end{table}
 
-Kịch bản sinh dữ liệu được thiết kế bằng cách hòa trộn hai luồng lưu lượng mạng hoạt động song song. Luồng thứ nhất mô phỏng hành vi của người dùng hợp lệ, sinh ra các địa chỉ IP ngẫu nhiên phân bổ rải rác theo thời gian với tỷ lệ trả về mã trạng thái thành công cao. 
+Kịch bản sinh dữ liệu được thiết kế bằng cách phân bổ 04 luồng lưu lượng mạng hoạt động song song với xác suất linh hoạt: luồng người dùng bình thường (70\%), tấn công dò đoán mật khẩu (10\%), rà quét lỗ hổng (10\%) và thu thập dữ liệu tự động (10\%). Điểm bám sát thực tế của kịch bản nằm ở việc cấu hình thời gian trễ (sleep time): trong khi thao tác của người dùng thực có độ trễ lớn (0.05 - 0.5 giây), các kịch bản mạng máy tính ma đẩy tốc độ truy cập lên mức cực nhanh (0.005 - 0.05 giây) để tạo ra các đợt tấn công dồn dập. 
 
-Luồng thứ hai đóng vai trò cấu thành một cuộc tấn công từ mạng máy tính ma. Tại luồng này, một danh sách cố định các địa chỉ IP độc hại được thiết lập để liên tục gửi yêu cầu truy cập vào đường dẫn đăng nhập (\texttt{/login}) của hệ thống. Tần suất của luồng này được đẩy lên mức rất cao, đồng thời chủ đích sinh ra các mã lỗi xác thực (mã lỗi \texttt{401}). Sự chênh lệch đột biến về tần suất lỗi từ một nhóm IP cố định chính là đặc điểm nhận dạng cốt lõi để kiểm thử thuật toán phát hiện bất thường.
+Tuy nhiên, để tối ưu hóa tốc độ bơm thông điệp, mã nguồn hiện tại sử dụng cơ chế bỏ qua ngoại lệ (\texttt{except: pass}). Điều này là sự đánh đổi có chủ đích trong môi trường thử nghiệm, nhưng tiềm ẩn rủi ro "nuốt lỗi" gây khó khăn cho việc gỡ lỗi nếu trạm Kafka chưa kịp khởi động hoàn tất.
 
 Dưới đây là ví dụ minh họa trực quan về sự khác biệt giữa hai bản ghi dữ liệu được sinh ra từ hệ thống:
 
-% Cấu hình khung chứa code
 \lstset{
     basicstyle=\ttfamily\small,
     backgroundcolor=\color{gray!10},
@@ -321,28 +320,26 @@ Dưới đây là ví dụ minh họa trực quan về sự khác biệt giữa 
 \vspace{0.5cm}
 \noindent \textbf{Bản ghi 1: Lưu lượng người dùng hợp lệ (Truy cập thành công)}
 \begin{lstlisting}
-{"ip_address": "192.168.1.45", "timestamp": "2024-05-12T10:05:22Z", "method": "GET", "endpoint": "/home", "status_code": 200}
+{"ip": "192.168.1.45", "url": "/home", "method": "GET", "status": 200, "time": "2026-03-19 10:05:22"}
 \end{lstlisting}
 
 \noindent \textbf{Bản ghi 2: Lưu lượng mạng Botnet (Tấn công dò đoán mật khẩu)}
 \begin{lstlisting}
-{"ip_address": "10.0.0.99", "timestamp": "2024-05-12T10:05:22Z", "method": "POST", "endpoint": "/login", "status_code": 401}
+{"ip": "10.0.0.99", "url": "/login", "method": "POST", "status": 401, "time": "2026-03-19 10:05:22"}
 \end{lstlisting}
 
 \subsection{Cấu hình nhà sản xuất dữ liệu Kafka}
 Để thiết lập tuyến truyền tải từ tiến trình giả lập đến trạm trung chuyển Kafka, một đối tượng nhà sản xuất dữ liệu (Producer) được khởi tạo thông qua thư viện giao tiếp lập trình. Nhiệm vụ của thành phần này là đảm bảo mọi bản ghi nhật ký đều được đưa vào hệ thống hàng đợi một cách an toàn và đúng trình tự.
 
-Trong phạm vi triển khai đồ án, chủ đề \texttt{web-logs} của Kafka được cấu hình với 3 phân vùng (Partitions = 3) nhằm mô phỏng và khai thác sức mạnh xử lý đa luồng, đồng thời thiết lập hệ số nhân bản bằng 1 (Replication Factor = 1) do tính chất giới hạn của môi trường trạm đơn (Single-node). Thời gian lưu giữ (Retention Policy) cũng được thiết lập mặc định để tự động xóa log sau chu kỳ nhất định nhằm tối ưu hóa dung lượng ổ cứng.
+Trong phạm vi triển khai đồ án, chủ đề \texttt{web-logs} của Kafka được cấu hình với 3 phân vùng (Partitions = 3) nhằm mô phỏng và khai thác sức mạnh xử lý đa luồng, đồng thời thiết lập hệ số nhân bản bằng 1 (Replication Factor = 1) do tính chất giới hạn của môi trường trạm đơn. Các chính sách lưu giữ (Retention Policy) cũng được thiết lập mặc định để tự động xóa log sau chu kỳ nhất định nhằm tối ưu hóa dung lượng ổ cứng.
 
 Nhằm mô phỏng chính xác môi trường dữ liệu lớn với áp lực lưu lượng cao, quá trình gửi thông điệp được cấu hình hoạt động theo cơ chế bất đồng bộ. Thay vì tuần tự chờ phản hồi, tiến trình sinh dữ liệu có thể liên tục đẩy hàng ngàn bản ghi mỗi giây mà không bị đình trệ, giúp tối ưu hóa hiệu suất băng thông và ép hệ thống phân tích phía sau phải hoạt động ở trạng thái giới hạn tải.
 
 \section{Xử lý và phân tích dữ liệu}
 \subsection{Truy xuất và tái cấu trúc dữ liệu với Spark (ETL Pipeline)}
-Sau khi lưu lượng nhật ký được tập kết an toàn tại trạm trung chuyển Kafka, cụm Apache Spark được khởi chạy để đóng vai trò làm cỗ máy xử lý luồng (Stream Processor). Khác với các kiến trúc nguyên khối, hệ thống trong đồ án tách biệt hoàn toàn khâu tiền xử lý dữ liệu và khâu đối sánh tập luật.
+Sau khi lưu lượng nhật ký được tập kết an toàn tại trạm trung chuyển Kafka, cụm Apache Spark được khởi chạy để đóng vai trò làm cỗ máy xử lý luồng. Khác với các kiến trúc nguyên khối, hệ thống trong đồ án tách biệt hoàn toàn khâu tiền xử lý dữ liệu và khâu đối sánh tập luật.
 
-Nhiệm vụ đầu tiên của Spark là thiết lập kết nối với Kafka để truy xuất luồng byte thô. Thông qua giao diện lập trình PySpark, một lược đồ dữ liệu (Schema) tĩnh được định nghĩa nghiêm ngặt, bao gồm các trường: địa chỉ IP, đường dẫn, phương thức, mã trạng thái và thời gian. 
-
-Khi luồng dữ liệu nhị phân chảy vào, khung tính toán sẽ lập tức chuyển đổi chúng thành chuỗi ký tự và áp dụng lược đồ trên để bóc tách định dạng JSON. Kết quả thu được là một khung dữ liệu phân tán (DataFrame) có cấu trúc chuẩn hóa, sẵn sàng cho các thao tác lưu trữ.
+Nhiệm vụ đầu tiên của Spark là thiết lập kết nối với Kafka để truy xuất luồng byte thô. Khi luồng dữ liệu nhị phân chảy vào, khung tính toán sẽ lập tức chuyển đổi chúng thành chuỗi ký tự và áp dụng lược đồ để bóc tách định dạng JSON. Kết quả thu được là một khung dữ liệu phân tán (DataFrame) có cấu trúc chuẩn hóa, sẵn sàng cho các thao tác lưu trữ.
 
 \vspace{0.5cm}
 \noindent \textbf{Trích đoạn mã 1: Kết nối Kafka và bóc tách lược đồ JSON}
@@ -384,17 +381,12 @@ query.awaitTermination()
 \end{lstlisting}
 
 \subsection{Thuật toán phân tích và phát hiện bất thường}
-Dựa trên nền tảng dữ liệu liên tục được cập nhật từ Hồ dữ liệu, một phân hệ phân tích độc lập được xây dựng nhằm quét và phát hiện các luồng tấn công. Việc tách rời cụm tính toán Spark và phân hệ phân tích giúp hệ thống đạt độ khả dụng cao: ngay cả khi giao diện giám sát bị gián đoạn, luồng dữ liệu vẫn không bị thất thoát.
+Thuật toán nhận diện sự cố được lập trình dựa trên tập luật đối sánh ngưỡng (Threshold-based Rule Matching), phân loại các mối đe dọa thành ba nhóm kịch bản chính: Tấn công dò đoán mật khẩu (Lỗi 401), Dò quét lỗ hổng hệ thống (Lỗi 404), và Thu thập dữ liệu tự động (Mã 200 vượt ngưỡng). Thông qua việc kết hợp các phép toán xử lý luồng và đối sánh tập luật, hệ thống duy trì được độ chính xác cao trong việc nhận diện đa dạng các mẫu hình tấn công.
 
-Thuật toán nhận diện sự cố được lập trình dựa trên tập luật đối sánh ngưỡng (Threshold-based Rule Matching), phân loại các mối đe dọa thành ba nhóm kịch bản chính:
+\subsection{Trực quan hóa thời gian thực với Bảng điều khiển trung tâm}
+Để khai thác luồng dữ liệu liên tục đổ về từ Hồ dữ liệu (các tệp CSV), một Bảng điều khiển trung tâm (Dashboard) được phát triển bằng khung ứng dụng web Streamlit của Python. Phân hệ này hoạt động hoàn toàn độc lập với cụm Spark, tuân thủ chặt chẽ kiến trúc tách rời (Decoupled Architecture).
 
-\begin{enumerate}
-    \item \textbf{Tấn công dò đoán mật khẩu:} Hệ thống lọc các bản ghi trả về mã lỗi 401 (Lỗi xác thực), sau đó tiến hành gom nhóm theo địa chỉ IP nguồn. Nếu một địa chỉ IP phát sinh lớn hơn 10 lỗi, hệ thống lập tức gắn cờ cảnh báo mạng máy tính ma.
-    \item \textbf{Dò quét lỗ hổng hệ thống:} Thuật toán lọc các mã lỗi 404 (Không tìm thấy tài nguyên). Việc một IP liên tục truy cập vào các đường dẫn ẩn và nhận về hơn 10 mã lỗi 404 được hệ thống xác định là hành vi rà quét thư mục quản trị trái phép.
-    \item \textbf{Thu thập dữ liệu tự động:} Đối với các truy cập trả về mã 200 (Thành công), hệ thống vẫn tiến hành thống kê. Nếu tần suất tải trang của một IP vượt quá ngưỡng 30 lần trong một khung thời gian ngắn, IP đó sẽ bị đưa vào danh sách theo dõi vì có dấu hiệu sử dụng công cụ tự động để cào dữ liệu nghiệp vụ.
-\end{enumerate}
-
-Thông qua việc kết hợp các phép toán xử lý luồng tại Spark và đối sánh tập luật linh hoạt, hệ thống duy trì được mức độ chính xác cao trong việc nhận diện đa dạng các mẫu hình tấn công, đồng thời loại bỏ được các cảnh báo sai gây ra bởi sự nhầm lẫn của người dùng thông thường.
+Về mặt kỹ thuật, bảng điều khiển sử dụng thư viện Pandas để đọc và gộp (concat) toàn bộ các tệp CSV cục bộ thành một Khung dữ liệu (DataFrame) thống nhất. Dữ liệu sau đó được xử lý, gom nhóm và trực quan hóa thành các biểu đồ động thông qua thư viện Plotly. Điểm cốt lõi giúp giao diện đạt được tính năng thời gian thực là việc tích hợp vòng lặp làm mới tự động: hệ thống sử dụng lệnh \texttt{time.sleep(1)} kết hợp với \texttt{st.rerun()} để ép trình duyệt tải lại và cập nhật dữ liệu mới mỗi giây một lần.
 
 % ---------------- CHƯƠNG IV ----------------
 \chapter{KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}

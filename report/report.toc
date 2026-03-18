@@ -36,6 +36,7 @@
 \contentsline {subsection}{\numberline {3.3.1}Truy xuất và tái cấu trúc dữ liệu với Spark (ETL Pipeline)}{12}{subsection.3.3.1}%
 \contentsline {subsection}{\numberline {3.3.2}Cơ chế xử lý lô nhỏ và lưu trữ Hồ dữ liệu (Micro-batching)}{13}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Thuật toán phân tích và phát hiện bất thường}{13}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Trực quan hóa thời gian thực với Bảng điều khiển trung tâm}{13}{subsection.3.3.4}%
 \contentsline {chapter}{\numberline {4}KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}{15}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Khởi chạy hệ thống và tiếp nhận luồng dữ liệu}{15}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Giám sát tổng quan tại Trung tâm Điều hành An ninh}{16}{section.4.2}%
