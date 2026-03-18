@@ -8,13 +8,17 @@
 \usepackage{geometry}
 \usepackage{titlesec}
 \usepackage{tocloft}
+\usepackage{tikz} % Thư viện dùng để vẽ khung viền trang bìa
+\usetikzlibrary{calc}
 
 \geometry{a4paper, left=3cm, right=2cm, top=2cm, bottom=2cm}
 
+% Định dạng tiêu đề chương
 \titleformat{\chapter}[display]
   {\normalfont\huge\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
 \titlespacing*{\chapter}{0pt}{-50pt}{40pt}
 
+% Cấu hình hyperlink (Click vào mục lục nhảy đến trang)
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
@@ -25,93 +29,142 @@
 
 \begin{document}
 
+% ================= TRANG BÌA =================
 \begin{titlepage}
+    % Vẽ khung viền kép chuẩn đồ án
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[line width = 2pt] ($(current page.north west) + (2.5cm,-2cm)$) rectangle ($(current page.south east) + (-1.5cm,2cm)$);
+        \draw[line width = 0.5pt] ($(current page.north west) + (2.6cm,-2.1cm)$) rectangle ($(current page.south east) + (-1.6cm,2.1cm)$);
+    \end{tikzpicture}
+
     \begin{center}
-        \textbf{\Large ĐẠI HỌC SÀI GÒN} \\[0.5cm]
-        \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[3cm]
+        \vspace*{0.8cm} % ĐÃ SỬA: Đẩy cụm chữ trên cùng lùi xuống cách xa viền
+        \textbf{\large BỘ GIÁO DỤC VÀ ĐÀO TẠO} \\[0.2cm]
+        \textbf{\Large TRƯỜNG ĐẠI HỌC SÀI GÒN} \\[0.2cm]
+        \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[1.5cm]
 
-        \textbf{\Large BÁO CÁO ĐỒ ÁN CUỐI KÌ KẾT THÚC HỌC PHẦN} \\[0.5cm]
-        \textbf{\large Bộ Môn: Xử lý dữ liệu lớn (Big Data)} \\[2cm]
+        % Chèn Logo
+        \includegraphics[width=4cm]{logo.png} \\[1.5cm]
 
-        {\LARGE \textbf{CHỦ ĐỀ: XÂY DỰNG HỆ THỐNG SOC PHÂN TÍCH DỮ LIỆU LỚN VỚI KAFKA VÀ SPARK}}\\[3cm]
+        \textbf{\Large BÁO CÁO ĐỒ ÁN CUỐI KỲ} \\[0.5cm]
+        \textbf{\large Học phần: Xử lý dữ liệu lớn (Big Data)} \\[2cm]
+
+        {\LARGE \textbf{CHỦ ĐỀ: XÂY DỰNG HỆ THỐNG SOC PHÂN TÍCH DỮ LIỆU LỚN VỚI KAFKA VÀ SPARK}}\\[2.5cm]
 
         \begin{flushleft}
             \large
-            \textbf{Giảng viên:} Vũ Ngọc Thanh Sang \\[0.5cm]
-            \textbf{Sinh Viên:} Nguyễn Trương Cao Sơn \\[0.5cm]
-            \textbf{Lớp:} DDU1231 
+            \hspace{2.5cm} \textbf{Giảng viên hướng dẫn:} Vũ Ngọc Thanh Sang \\[0.5cm]
+            \hspace{2.5cm} \textbf{Sinh viên thực hiện \hspace{0.25cm}:} Nguyễn Trương Cao Sơn \\[0.5cm]
+            \hspace{2.5cm} \textbf{Lớp \hspace{3.4cm}:} DDU1231 
         \end{flushleft}
 
         \vfill
         {\large TP Hồ Chí Minh, năm 2024}
+        \vspace*{0.5cm} % ĐÃ SỬA: Đẩy dòng năm lùi lên trên một chút để không dính viền dưới
     \end{center}
 \end{titlepage}
 
-\pagenumbering{roman}
+% ================= MỤC LỤC TỰ ĐỘNG =================
+\pagenumbering{roman} % Đánh số trang i, ii, iii cho phần mục lục
 
-\tableofcontents
+\tableofcontents % Lệnh tự động sinh Mục lục
 \newpage
 
-\listoffigures
+\listoffigures % Lệnh tự động sinh Danh mục hình ảnh
 \newpage
 
-\pagenumbering{arabic}
+% ================= NỘI DUNG CHÍNH =================
+\pagenumbering{arabic} % Đánh số trang 1, 2, 3 cho nội dung
 
 \chapter*{LỜI MỞ ĐẦU}
 \addcontentsline{toc}{chapter}{LỜI MỞ ĐẦU}
-(Viết lời mở đầu ở đây...)
+(Viết lời mở đầu của bạn vào đây...)
 
 \newpage
 
+% ---------------- CHƯƠNG I ----------------
 \chapter{TỔNG QUAN VỀ ĐỀ TÀI}
 
 \section{Giới thiệu về đề tài}
 \subsection{Bối cảnh nghiên cứu}
-(Nội dung...)
+Trong kỷ nguyên số hóa hiện nay, các ứng dụng web và nền tảng thương mại điện tử đang phát triển bùng nổ, kéo theo lượng dữ liệu giao dịch và lưu lượng truy cập (traffic) khổng lồ được sinh ra mỗi ngày. Tuy nhiên, sự phát triển này cũng biến các hệ thống trực tuyến trở thành mục tiêu béo bở cho các tổ chức tội phạm mạng. Các hình thức tấn công mạng như dò quét lỗ hổng (Vulnerability Scanner), cào dữ liệu trái phép (Data Scraping), hay phổ biến nhất là tấn công dò đoán mật khẩu (Brute Force) từ các mạng máy tính ma (Botnet) diễn ra ngày càng tinh vi và dồn dập.
+
+Trước đây, quản trị viên an toàn thông tin thường dựa vào các công cụ phân tích log (nhật ký hệ thống) truyền thống hoặc xử lý theo lô (Batch Processing). Tuy nhiên, khi đối mặt với lượng dữ liệu lớn (Big Data) lên tới hàng chục nghìn lượt request mỗi giây, các hệ thống cũ nhanh chóng bộc lộ điểm yếu: quá tải, nghẽn cổ chai và độ trễ cao. Việc phát hiện một cuộc tấn công sau vài giờ, hay thậm chí vài phút, là quá muộn để ngăn chặn rủi ro rò rỉ dữ liệu hoặc sập hệ thống.
+
+Thực tiễn đó đặt ra yêu cầu cấp thiết phải có một Trung tâm Điều hành An ninh (SOC - Security Operations Center) thế hệ mới, có khả năng tiếp nhận và phân tích dữ liệu log theo thời gian thực (Real-time Stream Processing).
 
 \subsection{Lý do chọn đề tài}
-(Nội dung...)
+Từ bối cảnh nêu trên, em nhận thấy việc ứng dụng các công nghệ Dữ liệu lớn (Big Data) vào bài toán An toàn thông tin là một hướng đi vô cùng thiết thực và đầy tiềm năng. Việc sử dụng Apache Kafka để thu thập, điều phối luồng dữ liệu tốc độ cao và Apache Spark để tính toán trong bộ nhớ (in-memory) chính là chìa khóa để giải quyết bài toán độ trễ.
+
+Hơn nữa, một luồng dữ liệu log không chỉ có giá trị về mặt bảo mật (SIEM) mà còn chứa đựng vô vàn thông tin hữu ích về hành vi người dùng, phục vụ cho mục đích kinh doanh (Business Intelligence - BI). Do đó, em quyết định chọn đề tài "Xây dựng hệ thống SOC phân tích dữ liệu lớn với Kafka và Spark" nhằm kết hợp kiến thức của môn học Xử lý dữ liệu lớn vào một bài toán thực tế, mang lại góc nhìn đa chiều: vừa bảo vệ hệ thống, vừa phân tích hiệu quả kinh doanh.
 
 \section{Mục tiêu và phạm vi nghiên cứu}
 \subsection{Mục tiêu nghiên cứu}
-(Nội dung...)
+Đồ án được thực hiện với các mục tiêu chính sau đây:
+\begin{itemize}
+    \item \textbf{Về mặt lý thuyết:} Nghiên cứu và hiểu rõ kiến trúc, nguyên lý hoạt động của hệ sinh thái Big Data hiện đại, đặc biệt là nền tảng phân phối thông điệp Apache Kafka và khung xử lý dữ liệu phân tán Apache Spark (Structured Streaming).
+    \item \textbf{Về mặt thực hành:} Tự xây dựng và triển khai thành công một luồng dữ liệu (Data Pipeline) hoàn chỉnh từ khâu thu thập (Ingestion) đến khâu xử lý (Processing) và trực quan hóa (Visualization).
+    \item \textbf{Về mặt ứng dụng:} Xây dựng thuật toán phát hiện bất thường dựa trên ngưỡng (Threshold-based) để nhận diện các IP có hành vi tấn công Brute Force, Scanner hoặc Botnet cào dữ liệu, đồng thời xây dựng Dashboard giám sát thời gian thực.
+\end{itemize}
 
 \subsection{Phạm vi giới hạn của đồ án}
-(Nội dung...)
+Do thời gian và tài nguyên phần cứng có hạn, đồ án tập trung vào các phạm vi sau:
+\begin{itemize}
+    \item \textbf{Dữ liệu:} Dữ liệu đầu vào là các log web server (định dạng JSON) được giả lập theo thời gian thực (Mock Data), bao gồm cả lưu lượng người dùng bình thường và kịch bản tấn công.
+    \item \textbf{Mô hình triển khai:} Toàn bộ cụm hệ thống (Kafka, Spark) được triển khai cục bộ (Local) thông qua môi trường ảo hóa Docker Container để đảm bảo tính đồng nhất.
+    \item \textbf{Phương pháp phân tích:} Đồ án hiện tại sử dụng phương pháp thống kê và phân tích tập luật (Rule-based) để phát hiện tấn công thay vì sử dụng các mô hình Học máy (Machine Learning) phức tạp.
+    \item \textbf{Trực quan hóa:} Giao diện Dashboard được xây dựng bằng thư viện Streamlit và Plotly trong Python.
+\end{itemize}
 
 \section{Ý nghĩa thực tiễn}
-(Nội dung...)
+Đồ án cung cấp một mô hình thu nhỏ nhưng đầy đủ các thành phần cốt lõi của một hệ thống Big Data thực tế đang được sử dụng tại các doanh nghiệp công nghệ lớn. Kết quả của đồ án chứng minh tính khả thi của việc sử dụng luồng dữ liệu thời gian thực để tạo ra một hệ thống "Tất cả trong một" (All-in-One): Vừa giúp đội ngũ An ninh mạng (Blue Team) phát hiện và ngăn chặn hacker ngay lập tức, vừa giúp đội ngũ Marketing phân tích phễu chuyển đổi (Conversion Funnel) của khách hàng mà không làm ảnh hưởng đến hiệu năng của hệ thống chính.
 
+% ---------------- CHƯƠNG II ----------------
 \chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG NGHỆ}
 
 \section{Khái quát về Xử lý dữ liệu lớn (Big Data)}
 \subsection{Đặc trưng của dữ liệu lớn (Mô hình 3V/5V)}
-(Nội dung...)
+Dữ liệu lớn (Big Data) không chỉ đơn thuần là sự gia tăng về mặt dung lượng lưu trữ, mà còn bao hàm sự phức tạp trong việc thu thập và xử lý. Mô hình truyền thống mô tả Big Data qua 3 đặc trưng cốt lõi:
+\begin{itemize}
+    \item \textbf{Volume (Dung lượng):} Lượng dữ liệu khổng lồ sinh ra liên tục. Đối với hệ thống SOC, đây là hàng triệu dòng log truy cập web mỗi ngày.
+    \item \textbf{Velocity (Tốc độ):} Yêu cầu phải được xử lý tức thời (Real-time) để phát hiện tấn công.
+    \item \textbf{Variety (Đa dạng):} Dữ liệu đến từ nhiều nguồn và định dạng khác nhau (JSON, XML, Text).
+\end{itemize}
+Ngày nay, mô hình này mở rộng thành 5V với \textbf{Veracity (Tính xác thực)} - đảm bảo độ tin cậy của dữ liệu log để tránh nhận diện sai (False Positive), và \textbf{Value (Giá trị)} - khả năng trích xuất thông tin hữu ích (như IP tấn công hoặc phễu chuyển đổi hành vi).
 
 \subsection{Xử lý theo lô (Batch) và Xử lý luồng (Stream Processing)}
-(Nội dung...)
+Trong xử lý dữ liệu truyền thống, dữ liệu thường được lưu trữ tĩnh trong các cơ sở dữ liệu và được truy vấn định kỳ (Batch Processing). Cách này phù hợp để làm báo cáo tổng kết nhưng hoàn toàn bất lực trước các cuộc tấn công mạng đang diễn ra.
+
+Ngược lại, đối với các hệ thống hiện đại như giám sát an ninh mạng, dữ liệu log máy chủ được sinh ra liên tục dưới dạng một luồng bất tận. Lúc này, phương pháp xử lý luồng (Stream Processing) trở nên thiết yếu. Nó cho phép hệ thống tính toán các phép phân tích thống kê ngay tại thời điểm bản ghi dữ liệu vừa được sinh ra. Điều này giúp giảm thiểu độ trễ (latency) từ hàng giờ xuống chỉ còn vài mili-giây, đáp ứng yêu cầu phản ứng nhanh trước các sự cố.
 
 \section{Nền tảng phân phối thông điệp Apache Kafka}
 \subsection{Kiến trúc tổng quan của Kafka}
-(Nội dung...)
+Apache Kafka là một nền tảng truyền phát sự kiện phân tán (Distributed Event Streaming Platform) mã nguồn mở. Kiến trúc của Kafka giải quyết triệt để bài toán nút thắt cổ chai (bottleneck) trong truyền tải dữ liệu giữa nhiều hệ thống.
+
+Nó hoạt động theo mô hình Publish-Subscribe và đóng vai trò như một bộ đệm (Buffer) khổng lồ: nơi các chương trình sinh dữ liệu (Producers) đẩy thông điệp vào, và các chương trình xử lý (Consumers) kéo dữ liệu ra. Việc tách biệt (decouple) hoàn toàn này giúp hệ thống xử lý phía sau (như Spark) không bị quá tải hay sập nguồn khi lượng người truy cập website tăng đột biến (Spike traffic).
 
 \subsection{Cơ chế lưu trữ và hoạt động (Topic, Partition)}
-(Nội dung...)
+Luồng dữ liệu trong Kafka được tổ chức theo các \textbf{Topic} (Chủ đề). Để đảm bảo khả năng mở rộng, mỗi Topic được chia nhỏ thành các \textbf{Partition} (Phân vùng). Dữ liệu ghi vào Partition mang tính tuần tự và bất biến, cho phép các Consumer đọc dữ liệu một cách độc lập và song song với tốc độ cực cao.
 
 \section{Khung tính toán phân tán Apache Spark}
 \subsection{Giới thiệu về Apache Spark và xử lý In-Memory}
-(Nội dung...)
+Apache Spark là một hệ thống tính toán phân tán song song hoạt động trên bộ nhớ RAM (In-Memory Computing). Khác với các công cụ thế hệ cũ như Hadoop MapReduce thường phải ghi dữ liệu trung gian xuống ổ cứng gây chậm trễ, Spark thực hiện phần lớn các tác vụ trên RAM, đem lại tốc độ xử lý vượt trội, cực kỳ phù hợp cho bài toán theo thời gian thực.
 
 \subsection{Mô hình Spark Structured Streaming}
-(Nội dung...)
+Trong đồ án này, công nghệ Spark Structured Streaming được áp dụng làm "bộ não" xử lý. Kỹ thuật này coi luồng dữ liệu thời gian thực như một bảng quan hệ vô hạn (Unbounded Table) đang liên tục được bổ sung dòng mới.
+
+Bằng cơ chế chia lô cực nhỏ (Micro-batching), hệ thống có thể áp dụng các truy vấn SQL chuẩn (như Gom nhóm \textit{groupBy}, Đếm \textit{count}) lên luồng dữ liệu một cách dễ dàng. Đồng thời, cơ chế này cũng đảm bảo tính nhất quán và khả năng chịu lỗi (Fault-tolerance) nhờ việc lưu lại các checkpoint trong quá trình chạy.
 
 \section{Ứng dụng trong An toàn thông tin (Hệ thống SIEM)}
 \subsection{Khái niệm về hệ thống SIEM}
-(Nội dung...)
+SIEM (Security Information and Event Management) là giải pháp quản lý sự kiện và thông tin bảo mật. Nhiệm vụ cốt lõi của SIEM là thu thập log từ nhiều nguồn (máy chủ, tường lửa, ứng dụng), sau đó tương quan và phân tích dữ liệu để phát hiện các dấu hiệu bất thường, cung cấp cái nhìn toàn cảnh về bức tranh an ninh của doanh nghiệp.
 
 \subsection{Kỹ thuật tấn công Brute Force và cơ chế phát hiện}
-(Nội dung...)
+Tấn công Brute Force (dò đoán mật khẩu) là một trong những phương thức xâm nhập phổ biến nhất. Kẻ tấn công thường sử dụng một mạng lưới các máy tính bị nhiễm mã độc (Botnet) để tự động gửi hàng ngàn yêu cầu đăng nhập với các tổ hợp tài khoản/mật khẩu khác nhau.
 
+Đặc điểm nhận dạng của loại tấn công này là tần suất xuất hiện dày đặc của các mã trạng thái HTTP lỗi (ví dụ: 401 Unauthorized) từ cùng một địa chỉ IP. Trong phạm vi đồ án, công nghệ Big Data được ứng dụng để liên tục giám sát trạng thái này. Bằng cách đếm số lượng phản hồi 401 của mỗi IP, nếu con số này vượt qua một ngưỡng (Threshold) được định trước trong một cửa sổ thời gian (Time Window), hệ thống sẽ tự động ghi nhận đó là hành vi độc hại và xuất IP đó ra danh sách chặn (Blacklist).
+
+% ---------------- CHƯƠNG III ----------------
 \chapter{ỨNG DỤNG VÀ TRIỂN KHAI BÀI TOÁN THỰC TẾ}
 
 \section{Phương pháp nghiên cứu và kiến trúc hệ thống}
@@ -135,6 +188,7 @@
 \subsection{Thuật toán phát hiện bất thường và trích xuất Blacklist}
 (Nội dung...)
 
+% ---------------- CHƯƠNG IV ----------------
 \chapter{KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}
 
 \section{Kết quả chạy thực nghiệm}
