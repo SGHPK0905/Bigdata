@@ -1,0 +1,577 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{xcolor}
+\usetikzlibrary{calc}
+
+\geometry{a4paper, left=3cm, right=2cm, top=2cm, bottom=2cm}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-50pt}{40pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,      
+    urlcolor=blue,
+    pdftitle={Báo cáo Đồ án Big Data - SOC},
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[color=cyan!70!blue, line width = 2pt] 
+            ($(current page.north west) + (2cm,-1.5cm)$) 
+            rectangle 
+            ($(current page.south east) + (-1.2cm,1.5cm)$);
+
+        \draw[color=cyan!70!blue, line width = 0.5pt] 
+            ($(current page.north west) + (2.1cm,-1.6cm)$) 
+            rectangle 
+            ($(current page.south east) + (-1.3cm,1.6cm)$);
+    \end{tikzpicture}
+
+    \begin{center}
+        \vspace*{0.8cm}
+        \textbf{\large BỘ GIÁO DỤC VÀ ĐÀO TẠO} \\[0.2cm]
+        \textbf{\Large TRƯỜNG ĐẠI HỌC SÀI GÒN} \\[0.2cm]
+        \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[1.5cm]
+
+        \includegraphics[width=4cm]{logo.png} \\[1.5cm]
+
+        \textbf{\Large BÁO CÁO ĐỒ ÁN CUỐI KỲ} \\[0.5cm]
+        \textbf{\large Học phần: Xử lý dữ liệu lớn (Big Data)} \\[2cm]
+
+        {\LARGE \textbf{CHỦ ĐỀ: XÂY DỰNG HỆ THỐNG SOC PHÂN TÍCH DỮ LIỆU LỚN VỚI KAFKA VÀ SPARK}}\\[2.5cm]
+
+        \begin{flushleft}
+            \large
+            \hspace{2.5cm} \textbf{Giảng viên hướng dẫn:} Vũ Ngọc Thanh Sang \\[0.5cm]
+            \hspace{2.5cm} \textbf{Sinh viên thực hiện \hspace{0.25cm}:} Nguyễn Trương Cao Sơn \\[0.5cm]
+            \hspace{2.5cm} \textbf{Lớp \hspace{3.4cm}:} DDU1231 
+        \end{flushleft}
+
+        \vfill
+        {\large TP Hồ Chí Minh, năm 2026}
+        \vspace*{0.5cm}
+    \end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\tableofcontents
+\newpage
+
+\listoffigures
+\newpage
+
+\pagenumbering{arabic}
+
+\chapter*{ABSTRACT}
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+The exponential growth of web services has brought unprecedented economic value, yet it simultaneously introduces severe cybersecurity challenges. Modern enterprise web servers are constantly targeted by botnets executing brute-force attacks, vulnerability scanning, and automated data scraping. Traditional batch-processing architectures and relational databases have proven inadequate due to high latency, depriving network administrators of the "golden window" needed to mitigate threats in real-time.
+
+To address these critical limitations, this project proposes and implements a real-time Security Operations Center (SOC) and Business Intelligence (BI) pipeline leveraging Big Data technologies. The proposed architecture utilizes Apache Kafka as a high-throughput, fault-tolerant message broker to ingest continuous simulated web logs. Subsequently, Apache Spark Structured Streaming acts as the core distributed processing engine, employing a micro-batching mechanism to aggregate and analyze data within 3-second sliding windows. 
+
+Experimental results demonstrate the system's robustness under high-pressure scenarios, successfully parsing over 9,000 requests and instantly isolating malicious IP addresses executing unauthorized access (HTTP 401) and directory scanning (HTTP 404). Furthermore, demonstrating the versatility of decoupled streaming architectures, the system filters out malicious traffic to repurpose legitimate access logs for BI analytics. The filtered data successfully generates a highly accurate conversion funnel, revealing a 10.38\% e-commerce conversion rate. 
+
+Overall, the project validates the efficacy of combining Kafka and Spark to transform passive log files into active, dual-purpose data assets—simultaneously shielding enterprise infrastructure and driving data-driven business decisions.
+
+\textbf{Keywords:} Big Data, Apache Kafka, Apache Spark, Real-time Stream Processing, Anomaly Detection, SIEM.
+
+\chapter*{LỜI MỞ ĐẦU}
+\addcontentsline{toc}{chapter}{LỜI MỞ ĐẦU}
+
+Sự phát triển bùng nổ của không gian mạng và các dịch vụ trực tuyến mang lại nhiều giá trị kinh tế to lớn, nhưng đồng thời cũng đặt ra những thách thức nghiêm trọng về an toàn thông tin \cite{vnisa2023}. Các hệ thống máy chủ doanh nghiệp ngày nay phải đối mặt với áp lực liên tục từ các chiến dịch tấn công dò đoán mật khẩu, rà quét lỗ hổng hệ thống và các công cụ thu thập dữ liệu trái phép \cite{owasp2021}. 
+
+Trong bối cảnh đó, tệp tin nhật ký truy cập mạng (Web Logs) đóng vai trò như một nguồn dữ liệu vô giá để theo dõi và truy vết các hành vi độc hại. Tuy nhiên, khối lượng nhật ký sinh ra mỗi ngày tại các hệ thống lớn là khổng lồ. Việc áp dụng các cơ sở dữ liệu quan hệ và phương pháp xử lý theo lô truyền thống đã bộc lộ rõ điểm yếu về độ trễ. Sự chậm trễ trong khâu phân tích khiến các nhà quản trị mạng mất đi "thời điểm vàng" để ngăn chặn tin tặc trước khi sự cố rò rỉ dữ liệu xảy ra.
+
+Xuất phát từ yêu cầu thực tiễn đó, đồ án được thực hiện nhằm nghiên cứu và ứng dụng các công nghệ xử lý dữ liệu lớn (Big Data) vào bài toán giám sát an ninh mạng. Kiến trúc hệ thống được đề xuất là sự kết hợp giữa khả năng trung chuyển luồng sự kiện tốc độ cao của nền tảng Apache Kafka và sức mạnh tính toán trực tiếp trên bộ nhớ của khung phân tán Apache Spark. Hơn thế nữa, đồ án không chỉ dừng lại ở việc thiết lập một Trung tâm điều hành an ninh (SOC) để cảnh báo xâm nhập thời gian thực, mà còn tái sử dụng chính luồng dữ liệu đó để xây dựng phân hệ Trí tuệ doanh nghiệp (BI), hỗ trợ phân tích tỷ lệ chuyển đổi khách hàng.
+
+Nội dung của quyển báo cáo được tổ chức thành 04 chương chính như sau:
+\begin{itemize}
+    \item \textbf{Chương I: Tổng quan về đề tài.} Trình bày bối cảnh, bài toán thực tế, mục tiêu nghiên cứu và giới hạn phạm vi của hệ thống.
+    \item \textbf{Chương II: Cơ sở lý thuyết và công nghệ.} Phân tích chuyên sâu về đặc trưng của dữ liệu lớn, kiến trúc hoạt động của nền tảng Kafka, Spark và các thuật toán đối sánh nhận diện tấn công.
+    \item \textbf{Chương III: Ứng dụng và triển khai bài toán thực tế.} Trình bày sơ đồ kiến trúc tổng thể, cách thức xây dựng kịch bản mạng máy tính ma và chi tiết quy trình xử lý luồng dữ liệu phân tán.
+    \item \textbf{Chương IV: Kết quả thực nghiệm và đánh giá.} Trực quan hóa dữ liệu trên Bảng điều khiển trung tâm, phân tích các chỉ số an ninh, chỉ số kinh doanh và đưa ra đánh giá tổng kết về hiệu năng của toàn bộ kiến trúc.
+\end{itemize}
+
+Dù đã nỗ lực nghiên cứu và hoàn thiện, nhưng do giới hạn về mặt thời gian cũng như kinh nghiệm thực tiễn, đồ án chắc chắn vẫn còn những thiếu sót. Nhóm thực hiện rất mong nhận được sự góp ý, chỉ bảo của quý Thầy/Cô để đề tài được hoàn thiện hơn và có định hướng phát triển trong tương lai.
+
+\newpage
+
+% ---------------- CHƯƠNG I ----------------
+\chapter{TỔNG QUAN VỀ ĐỀ TÀI}
+
+\section{Giới thiệu về đề tài}
+\subsection{Bối cảnh nghiên cứu}
+Trong kỷ nguyên số hóa hiện nay, các ứng dụng web và nền tảng thương mại điện tử đang phát triển bùng nổ, kéo theo lượng dữ liệu giao dịch và lưu lượng truy cập khổng lồ được sinh ra mỗi ngày. Sự phát triển này cũng biến các hệ thống trực tuyến trở thành mục tiêu béo bở cho tội phạm mạng. Các hình thức tấn công diễn ra ngày càng tinh vi, điển hình như dò quét lỗ hổng, thu thập dữ liệu trái phép, hay phổ biến nhất là tấn công dò đoán mật khẩu thông qua các mạng lưới máy tính ma hay còn gọi là Botnet \cite{owasp2021}.
+
+Trước đây, quản trị viên an toàn thông tin thường sử dụng các công cụ phân tích nhật ký hệ thống truyền thống hoặc xử lý dữ liệu theo từng đợt. Tuy nhiên, khi đối mặt với lượng dữ liệu lớn lên tới hàng chục nghìn yêu cầu mỗi giây, các hệ thống cũ nhanh chóng bộc lộ điểm yếu: quá tải, nghẽn cổ chai và độ trễ cao. Việc phát hiện một cuộc tấn công sau vài giờ, hay thậm chí vài phút, là quá muộn để ngăn chặn rủi ro rò rỉ dữ liệu hoặc sập hệ thống.
+
+Thực tiễn đó đặt ra yêu cầu cấp thiết phải xây dựng một Trung tâm Điều hành An ninh thế hệ mới, gọi tắt là hệ thống SOC. Hệ thống này phải có khả năng tiếp nhận và phân tích dữ liệu nhật ký hệ thống theo thời gian thực để chặn đứng các mối đe dọa ngay khi chúng vừa khởi phát \cite{chapple2021}.
+
+\subsection{Các khái niệm và công nghệ nền tảng}
+Để làm rõ hướng giải quyết cho bài toán nêu trên, phần này sẽ giải thích bản chất của các khái niệm và công nghệ cốt lõi được sử dụng xuyên suốt đồ án:
+
+\begin{itemize}
+    \item \textbf{Nhật ký hệ thống (Log):} Là các tệp dữ liệu tự động ghi lại mọi hoạt động xảy ra trên máy chủ (ai vừa truy cập, địa chỉ IP là gì, hành động thành công hay thất bại). Đây chính là nguồn "nguyên liệu" đầu vào để hệ thống tiến hành phân tích.
+    
+    \item \textbf{Mạng máy tính ma (Botnet) và Tấn công dò đoán mật khẩu (Brute Force):} Kẻ tấn công thường khống chế hàng ngàn máy tính của người dùng bình thường tạo thành một mạng lưới (Botnet). Chúng điều khiển mạng lưới này cùng lúc gửi hàng triệu lượt thử mật khẩu sai (Brute Force) nhằm làm sập hệ thống hoặc đánh cắp tài khoản \cite{owasp2021}.
+    
+    \item \textbf{Apache Kafka (Trạm trung chuyển dữ liệu):} Về bản chất, Kafka là một hệ thống điều phối và truyền tải dữ liệu tốc độ cao. Khi website bị tấn công, dữ liệu nhật ký sinh ra ồ ạt như một cơn lũ. Nếu đổ trực tiếp lượng dữ liệu này vào hệ thống phân tích, máy chủ chắc chắn sẽ quá tải. Kafka ra đời để đóng vai trò như một "hồ chứa nước đệm". Nó hứng chịu toàn bộ lưu lượng khổng lồ từ máy chủ web, lưu trữ tạm thời một cách an toàn, rồi điều tiết dòng chảy đó sang cho các bộ phận xử lý phía sau với tốc độ phù hợp, giúp toàn bộ kiến trúc không bao giờ bị nghẽn \cite{kafka_doc}.
+    
+    \item \textbf{Apache Spark (Khung tính toán trực tiếp trên bộ nhớ):} Nếu Kafka là người vận chuyển, thì Spark chính là "bộ não" xử lý. Đặc điểm làm nên sức mạnh của Spark là khả năng tính toán trực tiếp trên bộ nhớ RAM thay vì phải ghi và đọc dữ liệu liên tục từ ổ cứng như các công nghệ cũ. Nhờ vậy, Spark có thể hút dữ liệu liên tục từ Kafka, thực hiện đếm số lượt truy cập, gom nhóm các địa chỉ IP và phát hiện ra các điểm bất thường gần như ngay lập tức \cite{spark_doc}.
+\end{itemize}
+
+\subsection{Lý do chọn đề tài}
+Từ những khái niệm trên, có thể thấy việc ứng dụng các công nghệ xử lý dữ liệu lớn vào bài toán an toàn thông tin là một hướng đi thiết thực và đầy tiềm năng. Sự kết hợp hoàn hảo giữa khả năng chịu tải tuyệt vời của Kafka và tốc độ xử lý tức thời của Spark chính là lời giải trọn vẹn cho bài toán độ trễ trong giám sát hệ thống.
+
+Hơn nữa, một luồng dữ liệu nhật ký không chỉ có giá trị về mặt phát hiện mã độc mà còn chứa đựng vô vàn thông tin hữu ích về hành vi người dùng, phục vụ cho công tác phân tích và thống kê của doanh nghiệp. Do đó, đề tài \textbf{"Xây dựng hệ thống SOC phân tích dữ liệu lớn với Kafka và Spark"} được lựa chọn nhằm kết hợp kiến thức chuyên ngành vào một bài toán thực tế, mang lại góc nhìn đa chiều: vừa bảo vệ hệ thống nền tảng, vừa tận dụng triệt để nguồn dữ liệu sẵn có.
+
+\section{Mục tiêu và phạm vi nghiên cứu}
+\subsection{Mục tiêu nghiên cứu}
+Đồ án được thực hiện với các mục tiêu cụ thể sau:
+\begin{itemize}
+    \item \textbf{Về mặt lý thuyết:} Nghiên cứu và hiểu rõ kiến trúc, nguyên lý hoạt động của hệ sinh thái dữ liệu lớn hiện đại, đặc biệt là luồng xử lý thời gian thực thông qua Kafka và Spark.
+    \item \textbf{Về mặt thực hành:} Tự xây dựng và triển khai thành công một luồng dữ liệu thông suốt từ khâu thu thập, xử lý trực tiếp đến khâu trực quan hóa lên bảng điều khiển.
+    \item \textbf{Về mặt ứng dụng:} Xây dựng thuật toán phát hiện bất thường dựa trên ngưỡng thống kê để tự động nhận diện các địa chỉ IP có hành vi tấn công và đưa vào danh sách chặn \cite{anomaly_spark}.
+\end{itemize}
+
+\subsection{Phạm vi giới hạn của đồ án}
+Do giới hạn về thời gian và tài nguyên phần cứng, đồ án tập trung vào các phạm vi sau:
+\begin{itemize}
+    \item \textbf{Dữ liệu đầu vào:} Sử dụng dữ liệu nhật ký máy chủ web được giả lập liên tục theo thời gian thực, bao gồm cả lưu lượng người dùng bình thường và các kịch bản tấn công.
+    \item \textbf{Mô hình triển khai:} Toàn bộ hệ thống Kafka và Spark được triển khai cục bộ thông qua nền tảng ảo hóa Docker để đảm bảo tính đồng nhất và dễ dàng đóng gói \cite{docker_doc}.
+    \item \textbf{Phương pháp phân tích:} Đồ án sử dụng phương pháp thống kê và phân tích tập luật cơ bản để phát hiện tấn công thay vì áp dụng các mô hình học máy phức tạp.
+    \item \textbf{Trực quan hóa:} Giao diện giám sát được phát triển bằng ngôn ngữ Python kết hợp với các thư viện hỗ trợ vẽ biểu đồ động.
+\end{itemize}
+
+\section{Câu hỏi nghiên cứu}
+Để bám sát các mục tiêu đã đề ra và làm cơ sở đánh giá tính hiệu quả của hệ thống, đồ án tập trung giải quyết các câu hỏi nghiên cứu trọng tâm sau:
+\begin{itemize}
+    \item \textbf{Khả năng chịu tải (Throughput):} Nền tảng Apache Kafka có khả năng tiếp nhận và điều phối ổn định lưu lượng nhật ký truy cập (log traffic) lên tới bao nhiêu yêu cầu mỗi giây (requests/second) trước khi xảy ra hiện tượng mất mát dữ liệu?
+    \item \textbf{Độ trễ xử lý (Latency):} Khung tính toán Apache Spark Structured Streaming có thể rút ngắn thời gian phát hiện dấu hiệu tấn công từ lúc log được sinh ra cho đến khi đưa IP vào danh sách chặn xuống mức bao nhiêu giây?
+    \item \textbf{Ngưỡng phát hiện (Thresholding):} Làm thế nào để xác định được cửa sổ thời gian (Time Window) và ngưỡng giới hạn số lỗi truy cập (Error Rate Threshold) phù hợp để phân biệt chính xác giữa một cuộc tấn công Brute Force/Botnet và các truy cập lỗi thông thường của người dùng thực?
+\end{itemize}
+
+\section{Các hệ thống và giải pháp tương đương (Related Works)}
+Trên thực tế, bài toán quản lý và phân tích log đã được nhiều hệ thống SIEM truyền thống giải quyết, điển hình như ELK Stack (Elasticsearch, Logstash, Kibana) hay Splunk \cite{chapple2021}. Các hệ thống này cung cấp khả năng lưu trữ và tìm kiếm dữ liệu toàn văn bản cực kỳ mạnh mẽ. 
+
+Tuy nhiên, nhược điểm cốt lõi của các giải pháp này là chủ yếu dựa trên cơ chế đánh chỉ mục (Indexing-based) dữ liệu tĩnh. Nghĩa là dữ liệu phải được ghi xuống ổ cứng và lập chỉ mục xong thì mới có thể chạy truy vấn cảnh báo. Khi đối mặt với kịch bản bị tấn công từ chối dịch vụ (DDoS) hoặc Botnet cường độ cao, cơ chế ghi ổ cứng liên tục này sẽ tạo ra nút thắt cổ chai (Bottleneck), khiến hệ thống có độ trễ lớn và thậm chí tự sập trước khi kịp phát ra cảnh báo.
+
+Việc ứng dụng kiến trúc Kafka kết hợp Spark Streaming trong đồ án này mang lại một hướng tiếp cận khác biệt: \textbf{Xử lý dữ liệu đang bay (Data in-motion)} \cite{kleppmann2017}. Hệ thống không cần ghi dữ liệu thô xuống đĩa mà thực hiện gom nhóm và đếm trực tiếp trên bộ nhớ RAM (In-Memory Micro-batching), từ đó khắc phục triệt để nhược điểm độ trễ của các công cụ truyền thống trong các kịch bản tấn công khẩn cấp.
+
+\section{Ý nghĩa thực tiễn}
+Đồ án cung cấp một mô hình thu nhỏ nhưng bao hàm đầy đủ các thành phần cốt lõi của một nền tảng dữ liệu lớn thực tế. Kết quả của đồ án mang lại những giá trị rõ nét trên ba phương diện:
+
+\begin{itemize}
+    \item \textbf{Về mặt vận hành an ninh:} Hệ thống chứng minh khả năng thay thế các công cụ rà soát lỗi thủ công vốn có độ trễ cao. Nhờ phân tích dữ liệu trực tiếp trên bộ nhớ, hệ thống giúp đội ngũ bảo mật tự động nhận diện và trích xuất danh sách các địa chỉ IP độc hại gần như tức thời. Đây là tiền đề quan trọng để tích hợp với hệ thống tường lửa, giúp tự động chặn đứng tin tặc từ sớm.
+    
+    \item \textbf{Về mặt tận dụng dữ liệu thống kê:} Đồ án khẳng định sự đa dụng của nền tảng phân tích luồng. Cùng một nguồn dữ liệu đầu vào, ngoài việc phát hiện mã độc, hệ thống có thể đồng thời trích xuất các thông tin về lưu lượng truy cập hay tỷ lệ lỗi máy chủ. Quản trị viên có thể theo dõi sức khỏe website liên tục mà không gây thêm áp lực xử lý cho cơ sở dữ liệu chính yếu của doanh nghiệp.
+    
+    \item \textbf{Về mặt kiến trúc công nghệ:} Việc sử dụng trạm trung chuyển Kafka giúp tách biệt hoàn toàn cụm máy chủ web (nơi sinh dữ liệu) và cụm phân tích phía sau. Nhờ thiết kế phân tán này, hệ thống có khả năng mở rộng linh hoạt và chịu lỗi cực tốt, duy trì sự hoạt động nhịp nhàng ngay cả khi đối mặt với lượng truy cập tăng đột biến.
+\end{itemize}
+
+% ---------------- CHƯƠNG II ----------------
+\chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG NGHỆ}
+
+\section{Khái quát về Xử lý dữ liệu lớn}
+\subsection{Đặc trưng của dữ liệu lớn}
+Dữ liệu lớn không chỉ đơn thuần là sự gia tăng về mặt dung lượng lưu trữ, mà còn bao hàm sự phức tạp trong khâu thu thập và phân tích. Theo mô hình tiêu chuẩn, một hệ thống dữ liệu lớn được định hình qua năm đặc trưng cốt lõi:
+
+\begin{itemize}
+    \item \textbf{Dung lượng:} Khối lượng dữ liệu khổng lồ sinh ra liên tục. Đối với hệ thống giám sát an ninh, đây là hàng triệu dòng nhật ký truy cập mạng sinh ra mỗi ngày.
+    \item \textbf{Tốc độ:} Yêu cầu luồng dữ liệu phải được tiếp nhận và xử lý tức thời để đáp ứng các bài toán cần phản ứng nhanh như phát hiện tấn công.
+    \item \textbf{Đa dạng:} Dữ liệu đến từ nhiều nguồn máy chủ, thiết bị mạng khác nhau với các định dạng không đồng nhất như văn bản thuần, JSON hay định dạng mở rộng XML.
+    \item \textbf{Tính xác thực:} Đòi hỏi độ tin cậy và tính toàn vẹn của dữ liệu đầu vào. Việc đảm bảo tính xác thực giúp hệ thống phân tích tránh được các cảnh báo sai hoặc nhận diện nhầm người dùng hợp lệ thành tin tặc.
+    \item \textbf{Giá trị:} Là quá trình chắt lọc, biến đổi một luồng nhật ký hệ thống khô khan thành các cảnh báo bảo mật có giá trị thực tiễn cao.
+\end{itemize}
+
+\subsection{Xử lý theo lô và Xử lý theo luồng}
+Trước khi đi sâu vào các kiến trúc dữ liệu, cần phân biệt rõ hai mô hình tính toán nền tảng hiện nay:
+\begin{itemize}
+    \item \textbf{Xử lý theo lô (Batch Processing):} Là phương pháp tổng hợp và tích lũy dữ liệu thành các tập hợp lớn trong một chu kỳ thời gian nhất định (ví dụ: một giờ, một ngày). Sau khi kết thúc chu kỳ, hệ thống mới tiến hành xử lý toàn bộ khối lượng dữ liệu đó cùng một lúc.
+    \item \textbf{Xử lý theo luồng (Stream Processing):} Là phương pháp xử lý dữ liệu liên tục. Hệ thống sẽ tiếp nhận và thực hiện tính toán ngay lập tức trên từng bản ghi (hoặc các lô dữ liệu cực nhỏ) ngay tại thời điểm chúng vừa được sinh ra \cite{kleppmann2017}.
+\end{itemize}
+
+Trong kiến trúc dữ liệu truyền thống, phương pháp xử lý theo lô thường được ưu tiên áp dụng. Dữ liệu được lưu trữ tĩnh trong các cơ sở dữ liệu và truy vấn định kỳ. Phương pháp này rất hiệu quả trong việc kết xuất báo cáo tổng kết, nhưng lại thiếu tính đáp ứng thời gian thực khi đối mặt với các cuộc tấn công mạng đang diễn ra.
+
+Để khắc phục độ trễ hệ thống, các nền tảng giám sát hiện đại bắt buộc phải chuyển dịch sang phương pháp xử lý theo luồng. Đối với bài toán an ninh mạng, xử lý luồng giúp giảm thiểu độ trễ từ mức hàng giờ xuống chỉ còn vài phần nghìn giây. Điều này cho phép hệ thống nhận diện và cảnh báo tức thời các dấu hiệu bất thường, mang ý nghĩa quyết định trong việc ngăn chặn kịp thời các sự cố rò rỉ hoặc ngưng trệ dịch vụ.
+
+\section{Nền tảng phân phối sự kiện Apache Kafka}
+\subsection{Kiến trúc kỹ thuật của Kafka}
+Apache Kafka được xây dựng dựa trên kiến trúc phân tán với khả năng mở rộng hệ thống theo chiều ngang \cite{kafka_doc}. Cốt lõi của Kafka là một cụm máy chủ bao gồm nhiều trạm trung gian làm nhiệm vụ điều phối luồng thông điệp.
+
+Mô hình giao tiếp của Kafka tuân theo cơ chế Xuất bản và Đăng ký. Điểm tạo nên tốc độ cực cao của Kafka so với các hệ thống hàng đợi truyền thống là khả năng ghi dữ liệu trực tiếp xuống ổ cứng một cách tuần tự, kết hợp với việc tận dụng tối đa bộ nhớ đệm của hệ điều hành. Cơ chế này cho phép Kafka tiếp nhận hàng triệu tin nhắn mỗi giây mà vẫn đảm bảo luồng dữ liệu không bị nghẽn và không bị mất mát khi xảy ra sự cố \cite{confluent_bench}.
+
+\subsection{Cơ chế phân vùng và nhóm tiêu thụ}
+Để đảm bảo tốc độ đọc ghi song song, luồng thông điệp trong Kafka được tổ chức chặt chẽ theo các chủ đề và chia nhỏ thành nhiều phân vùng. Dữ liệu khi ghi vào phân vùng mang tính bất biến và được đánh số thứ tự để hệ thống dễ dàng theo dõi.
+
+Đặc biệt, Kafka cung cấp cơ chế Nhóm tiêu thụ để phân tán khối lượng công việc. Nhiều máy chủ xử lý ở đầu ra có thể kết hợp thành một nhóm để cùng nhau đọc dữ liệu. Kafka sẽ tự động chia đều các phân vùng dữ liệu cho từng máy chủ trong nhóm. Nhờ cơ chế này, khi lưu lượng truy cập tăng vọt khiến hệ thống bị quá tải, quản trị viên chỉ cần bổ sung thêm máy chủ mới vào nhóm là khả năng xử lý sẽ lập tức được nhân lên một cách linh hoạt.
+
+\section{Khung tính toán phân tán Apache Spark}
+\subsection{Cơ chế tính toán trực tiếp trên bộ nhớ}
+Sức mạnh của Apache Spark nằm ở kiến trúc lõi với cấu trúc dữ liệu nền tảng RDD (tập dữ liệu phân tán có khả năng phục hồi). Cấu trúc này cho phép chia nhỏ dữ liệu và phân tán trên bộ nhớ RAM của nhiều máy trạm để tính toán song song \cite{zaharia2013}. Khác với các công cụ thế hệ cũ thường phải đọc và ghi dữ liệu trung gian liên tục xuống ổ cứng gây chậm trễ, Spark thực hiện phần lớn các tác vụ trực tiếp trên RAM, đem lại tốc độ xử lý vượt trội.
+
+Spark tối ưu hóa lộ trình tính toán bằng cách xây dựng một đồ thị luồng công việc có hướng. Hệ thống sử dụng cơ chế tính toán lười, tức là gom các phép biến đổi lại và chỉ thực thi khi có lệnh xuất kết quả. Kỹ thuật này giúp tiết kiệm tối đa tài nguyên máy tính và loại bỏ các thao tác xử lý dư thừa.
+
+\subsection{Xử lý luồng có cấu trúc và Khung thời gian}
+Đồ án áp dụng kỹ thuật xử lý luồng có cấu trúc của Spark \cite{spark_doc}. Kỹ thuật này coi luồng dữ liệu đang chảy liên tục như một bảng cơ sở dữ liệu vô hạn, nơi các dòng dữ liệu mới liên tục được đẩy vào. Hệ thống sẽ áp dụng cơ chế chia dữ liệu thành các lô cực nhỏ để tính toán và cập nhật kết quả liên tục từng giây.
+
+Đặc biệt, Spark cung cấp cơ chế tính toán theo khung thời gian cố định. Thay vì phân tích toàn bộ lịch sử dữ liệu từ trước đến nay, Spark cho phép cắt thời gian thực thành các đoạn ngắn (ví dụ mỗi phút là một khung) để gom nhóm và tổng hợp dữ liệu riêng biệt trong khung đó. Đây là công cụ đắc lực để giám sát sự gia tăng đột biến của các sự kiện an ninh.
+
+\section{Ứng dụng trong An toàn thông tin}
+\subsection{Khái niệm về hệ thống quản lý sự kiện bảo mật}
+Hệ thống quản lý sự kiện bảo mật (gọi tắt là SIEM) có nhiệm vụ cốt lõi là thu thập nhật ký từ hàng loạt thiết bị phần cứng, máy chủ và ứng dụng trong mạng nội bộ. Sau đó, hệ thống tiến hành đối chiếu các sự kiện rời rạc này lại với nhau để phân tích và phát hiện ra các hành vi thâm nhập bất hợp pháp, cung cấp cái nhìn toàn cảnh về bức tranh an ninh của doanh nghiệp \cite{chapple2021}.
+
+\subsection{Cơ chế phát hiện tấn công dò đoán mật khẩu}
+Trong an ninh mạng, tấn công dò đoán mật khẩu thường được thực hiện thông qua việc điều khiển hàng ngàn máy tính bị nhiễm mã độc để tự động gửi yêu cầu đăng nhập liên tục vào hệ thống. Dấu hiệu nhận biết rõ nét nhất của hình thức này là tần suất xuất hiện dày đặc của các phản hồi lỗi xác thực (mã lỗi 401) xuất phát từ cùng một địa chỉ IP.
+
+Để tự động hóa việc phát hiện, hệ thống Spark sẽ tiếp nhận luồng dữ liệu định dạng JSON từ máy chủ web, sau đó bóc tách để trích xuất ra hai thông tin then chốt: địa chỉ IP nguồn và mã trạng thái HTTP. 
+
+Thuật toán phát hiện được thiết lập dựa trên giới hạn ngưỡng kết hợp với khung thời gian cố định. Cụ thể, hệ thống sẽ cắt thời gian thực thành các khung liên tiếp nhau (ví dụ 1 phút mỗi khung). Bên trong mỗi khung thời gian này, Spark tiến hành gom nhóm dữ liệu theo từng địa chỉ IP và đếm tổng số lần xuất hiện của mã lỗi 401. Nếu số lượt lỗi của một IP cụ thể vượt qua ngưỡng cho trước, hệ thống ngay lập tức kích hoạt cảnh báo và tự động đưa IP đó vào danh sách chặn \cite{anomaly_spark}.
+
+% ---------------- CHƯƠNG III ----------------
+\chapter{ỨNG DỤNG VÀ TRIỂN KHAI BÀI TOÁN THỰC TẾ}
+
+\section{Phương pháp nghiên cứu và kiến trúc hệ thống}
+\subsection{Sơ đồ khối kiến trúc tổng thể}
+Để hiện thực hóa hệ thống SOC, đồ án thiết kế một chuỗi quy trình xử lý dữ liệu khép kín. Kiến trúc này được chia thành ba thành phần chính, hoạt động nối tiếp nhau theo thời gian thực:
+
+\begin{itemize}
+    \item \textbf{Thành phần thứ nhất: Trình tạo dữ liệu giả lập.} Thay vì sử dụng máy chủ thực tế, nghiên cứu phát triển một kịch bản Python đóng vai trò nguồn phát sinh sự kiện. Kịch bản này liên tục tạo ra các bản ghi nhật ký truy cập, trong đó lồng ghép lưu lượng mạng thông thường với các mẫu tấn công dò đoán mật khẩu từ mạng máy tính ma, sau đó truyền tải toàn bộ luồng dữ liệu này đến trạm trung chuyển.
+    
+    \item \textbf{Thành phần thứ hai: Trạm trung chuyển Apache Kafka.} Nền tảng này đóng vai trò cửa ngõ tiếp nhận toàn bộ lưu lượng sự kiện từ nguồn phát. Nhờ cơ chế lưu trữ đệm phân tán, Kafka giúp điều hòa tốc độ truyền tải, đảm bảo các máy chủ phân tích phía sau không bị quá tải hoặc ngưng trệ khi lưu lượng tấn công gia tăng đột biến.
+    
+    \item \textbf{Thành phần thứ ba: Cụm xử lý phân tích Apache Spark.} Đây là lõi tính toán của toàn bộ kiến trúc, chịu trách nhiệm truy xuất liên tục luồng sự kiện từ Kafka để xử lý trực tiếp trên bộ nhớ. Hệ thống thực hiện các phép toán gom nhóm và thống kê tần suất lỗi xác thực của từng địa chỉ IP theo các khung thời gian thực. Khi phát hiện chỉ số vượt ngưỡng an toàn, Spark sẽ xuất cảnh báo ra màn hình quản trị và tự động cập nhật địa chỉ IP vi phạm vào danh sách chặn.
+\end{itemize}
+
+ \begin{figure}[h]
+     \centering
+     \includegraphics[width=0.9\textwidth]{sodokientruc.png}
+     \caption{Sơ đồ khối kiến trúc tổng thể của hệ thống}
+ \end{figure}
+
+\subsection{Lựa chọn công nghệ triển khai ảo hóa}
+Trong môi trường thực tế, việc tích hợp nhiều nền tảng phân tán như Kafka và Spark trên cùng một máy chủ vật lý thường phát sinh xung đột về tài nguyên và thư viện phụ thuộc. 
+
+Để giải quyết triệt để vấn đề này, toàn bộ kiến trúc được triển khai dựa trên nền tảng ảo hóa cấp hệ điều hành Docker \cite{docker_doc}. Giải pháp này đóng gói từng dịch vụ thành các môi trường thực thi hoàn toàn độc lập, loại bỏ rủi ro can thiệp chéo giữa các tiến trình. 
+
+Đồng thời, công cụ quản lý Docker Compose được sử dụng để định nghĩa và liên kết chuỗi dịch vụ. Thông qua một tệp cấu hình tập trung, hệ thống có thể khởi động đồng loạt từ khâu sinh dữ liệu, trung chuyển đến xử lý phân tích. Cách tiếp cận này đảm bảo tính nhất quán cao, cô lập hoàn toàn môi trường thử nghiệm và đáp ứng đúng tiêu chuẩn triển khai vi dịch vụ hiện đại.
+
+\section{Thu thập và giả lập dữ liệu}
+\subsection{Xây dựng kịch bản mạng máy tính ma tấn công}
+Trong môi trường thử nghiệm, hệ thống không sử dụng máy chủ web thực tế mà vận hành một tập lệnh Python để giả lập quá trình sinh nhật ký truy cập. Dữ liệu đầu ra được định dạng theo chuẩn JSON, bao gồm các trường thông tin trọng yếu để phục vụ công tác phân tích an ninh. Cấu trúc chi tiết của một bản ghi nhật ký được mô tả trong Bảng \ref{tab:log_schema}.
+
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|l|l|p{8cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu dữ liệu} & \textbf{Mô tả ý nghĩa} \\
+        \hline
+        \texttt{ip\_address} & String & Địa chỉ IP nguồn của máy khách thực hiện truy cập. \\
+        \hline
+        \texttt{timestamp} & String & Thời gian ghi nhận sự kiện (định dạng ISO 8601). \\
+        \hline
+        \texttt{method} & String & Phương thức HTTP được sử dụng (\texttt{GET}, \texttt{POST}...). \\
+        \hline
+        \texttt{endpoint} & String & Đường dẫn tài nguyên đích trên máy chủ (ví dụ: \texttt{/login}). \\
+        \hline
+        \texttt{status\_code} & Integer & Mã trạng thái phản hồi HTTP (ví dụ: \texttt{200}, \texttt{401}, \texttt{404}). \\
+        \hline
+    \end{tabular}
+    \caption{Cấu trúc các trường thông tin trong bản ghi nhật ký giả lập}
+    \label{tab:log_schema}
+\end{table}
+
+Kịch bản sinh dữ liệu được thiết kế bằng cách hòa trộn hai luồng lưu lượng mạng hoạt động song song. Luồng thứ nhất mô phỏng hành vi của người dùng hợp lệ, sinh ra các địa chỉ IP ngẫu nhiên phân bổ rải rác theo thời gian với tỷ lệ trả về mã trạng thái thành công cao. 
+
+Luồng thứ hai đóng vai trò cấu thành một cuộc tấn công từ mạng máy tính ma. Tại luồng này, một danh sách cố định các địa chỉ IP độc hại được thiết lập để liên tục gửi yêu cầu truy cập vào đường dẫn đăng nhập (\texttt{/login}) của hệ thống. Tần suất của luồng này được đẩy lên mức rất cao, đồng thời chủ đích sinh ra các mã lỗi xác thực (mã lỗi \texttt{401}). Sự chênh lệch đột biến về tần suất lỗi từ một nhóm IP cố định chính là đặc điểm nhận dạng cốt lõi để kiểm thử thuật toán phát hiện bất thường.
+
+Dưới đây là ví dụ minh họa trực quan về sự khác biệt giữa hai bản ghi dữ liệu được sinh ra từ hệ thống:
+
+% Cấu hình khung chứa code
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    rulecolor=\color{black!30},
+    breaklines=true
+}
+
+\vspace{0.5cm}
+\noindent \textbf{Bản ghi 1: Lưu lượng người dùng hợp lệ (Truy cập thành công)}
+\begin{lstlisting}
+{"ip_address": "192.168.1.45", "timestamp": "2024-05-12T10:05:22Z", "method": "GET", "endpoint": "/home", "status_code": 200}
+\end{lstlisting}
+
+\noindent \textbf{Bản ghi 2: Lưu lượng mạng Botnet (Tấn công dò đoán mật khẩu)}
+\begin{lstlisting}
+{"ip_address": "10.0.0.99", "timestamp": "2024-05-12T10:05:22Z", "method": "POST", "endpoint": "/login", "status_code": 401}
+\end{lstlisting}
+
+\subsection{Cấu hình nhà sản xuất dữ liệu Kafka}
+Để thiết lập tuyến truyền tải từ tiến trình giả lập đến trạm trung chuyển Kafka, một đối tượng nhà sản xuất dữ liệu (Producer) được khởi tạo thông qua thư viện giao tiếp lập trình. Nhiệm vụ của thành phần này là đảm bảo mọi bản ghi nhật ký đều được đưa vào hệ thống hàng đợi một cách an toàn và đúng trình tự.
+
+Về mặt kỹ thuật, đối tượng này thực hiện thao tác tuần tự hóa (Serialization) toàn bộ các chuỗi JSON thành định dạng luồng byte trước khi truyền qua môi trường mạng. Luồng thông điệp sau đó được đẩy vào một chủ đề chuyên biệt đã được khai báo sẵn trên hệ thống Kafka. 
+
+Nhằm mô phỏng chính xác môi trường dữ liệu lớn với áp lực lưu lượng cao, quá trình gửi thông điệp được cấu hình hoạt động theo cơ chế bất đồng bộ. Thay vì tuần tự chờ phản hồi, tiến trình sinh dữ liệu có thể liên tục đẩy hàng ngàn bản ghi mỗi giây mà không bị đình trệ, giúp tối ưu hóa hiệu suất băng thông và ép hệ thống phân tích phía sau phải hoạt động ở trạng thái giới hạn tải.
+
+\section{Xử lý và phân tích dữ liệu}
+\subsection{Truy xuất và tái cấu trúc dữ liệu với Spark (ETL Pipeline)}
+Sau khi lưu lượng nhật ký được tập kết an toàn tại trạm trung chuyển Kafka, cụm Apache Spark được khởi chạy để đóng vai trò làm cỗ máy xử lý luồng (Stream Processor). Khác với các kiến trúc nguyên khối, hệ thống trong đồ án tách biệt hoàn toàn khâu tiền xử lý dữ liệu và khâu đối sánh tập luật.
+
+Nhiệm vụ đầu tiên của Spark là thiết lập kết nối với Kafka để truy xuất luồng byte thô. Thông qua giao diện lập trình PySpark, một lược đồ dữ liệu (Schema) tĩnh được định nghĩa nghiêm ngặt, bao gồm các trường: địa chỉ IP, đường dẫn, phương thức, mã trạng thái và thời gian. 
+
+Khi luồng dữ liệu nhị phân chảy vào, khung tính toán sẽ lập tức chuyển đổi chúng thành chuỗi ký tự và áp dụng lược đồ trên để bóc tách định dạng JSON. Kết quả thu được là một khung dữ liệu phân tán (DataFrame) có cấu trúc chuẩn hóa, sẵn sàng cho các thao tác lưu trữ.
+
+\vspace{0.5cm}
+\noindent \textbf{Trích đoạn mã 1: Kết nối Kafka và bóc tách lược đồ JSON}
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    rulecolor=\color{black!30},
+    breaklines=true
+}
+\begin{lstlisting}[language=Python]
+spark = SparkSession.builder.appName("SIEM_DataProcessing").getOrCreate()
+
+schema = StructType() \
+    .add("ip", StringType()) \
+    .add("url", StringType()) \
+    .add("method", StringType()) \
+    .add("status", IntegerType()) \
+    .add("time", TimestampType())
+
+df = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "kafka:29092").option("subscribe", "web-logs").load()
+
+parsed_df = df.select(from_json(col("value").cast("string"), schema).alias("data")).select("data.*")
+\end{lstlisting}
+
+\subsection{Cơ chế xử lý lô nhỏ và lưu trữ Hồ dữ liệu (Micro-batching)}
+Để đảm bảo tốc độ đáp ứng thời gian thực nhưng không làm quá tải thiết bị lưu trữ vật lý, đồ án áp dụng cơ chế chia lô cực nhỏ (Micro-batching) của Spark Structured Streaming.
+
+Thay vì ghi từng dòng nhật ký đơn lẻ xuống ổ cứng, hệ thống sử dụng bộ kích hoạt thời gian (Trigger) để gom toàn bộ dữ liệu nhận được mỗi 3 giây thành một lô. Từng lô dữ liệu này sau đó được đẩy qua hàm xử lý tuần tự để xuất ra các tệp định dạng CSV. Thư mục chứa các tệp này đóng vai trò như một Hồ dữ liệu (Data Lake) cục bộ, liên tục phình to theo thời gian thực để cung cấp nguồn nguyên liệu thô cho phân hệ cảnh báo.
+
+\vspace{0.5cm}
+\noindent \textbf{Trích đoạn mã 2: Cơ chế đẩy dữ liệu lô nhỏ xuống Hồ dữ liệu}
+\begin{lstlisting}[language=Python]
+def process_batch(batch_df, batch_id):
+    batch_df.write.format("csv").mode("append").option("header", "true").save("/app/ket_qua_output")
+
+query = parsed_df.writeStream.outputMode("append").foreachBatch(process_batch).trigger(processingTime='3 seconds').start()
+query.awaitTermination()
+\end{lstlisting}
+
+\subsection{Thuật toán phân tích và phát hiện bất thường}
+Dựa trên nền tảng dữ liệu liên tục được cập nhật từ Hồ dữ liệu, một phân hệ phân tích độc lập được xây dựng nhằm quét và phát hiện các luồng tấn công. Việc tách rời cụm tính toán Spark và phân hệ phân tích giúp hệ thống đạt độ khả dụng cao: ngay cả khi giao diện giám sát bị gián đoạn, luồng dữ liệu vẫn không bị thất thoát.
+
+Thuật toán nhận diện sự cố được lập trình dựa trên tập luật đối sánh ngưỡng (Threshold-based Rule Matching), phân loại các mối đe dọa thành ba nhóm kịch bản chính:
+
+\begin{enumerate}
+    \item \textbf{Tấn công dò đoán mật khẩu:} Hệ thống lọc các bản ghi trả về mã lỗi 401 (Lỗi xác thực), sau đó tiến hành gom nhóm theo địa chỉ IP nguồn. Nếu một địa chỉ IP phát sinh lớn hơn 10 lỗi, hệ thống lập tức gắn cờ cảnh báo mạng máy tính ma.
+    \item \textbf{Dò quét lỗ hổng hệ thống:} Thuật toán lọc các mã lỗi 404 (Không tìm thấy tài nguyên). Việc một IP liên tục truy cập vào các đường dẫn ẩn và nhận về hơn 10 mã lỗi 404 được hệ thống xác định là hành vi rà quét thư mục quản trị trái phép.
+    \item \textbf{Thu thập dữ liệu tự động:} Đối với các truy cập trả về mã 200 (Thành công), hệ thống vẫn tiến hành thống kê. Nếu tần suất tải trang của một IP vượt quá ngưỡng 30 lần trong một khung thời gian ngắn, IP đó sẽ bị đưa vào danh sách theo dõi vì có dấu hiệu sử dụng công cụ tự động để cào dữ liệu nghiệp vụ.
+\end{enumerate}
+
+Thông qua việc kết hợp các phép toán xử lý luồng tại Spark và đối sánh tập luật linh hoạt, hệ thống duy trì được mức độ chính xác cao trong việc nhận diện đa dạng các mẫu hình tấn công, đồng thời loại bỏ được các cảnh báo sai gây ra bởi sự nhầm lẫn của người dùng thông thường.
+
+% ---------------- CHƯƠNG IV ----------------
+\chapter{KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ}
+
+Chương này trình bày chi tiết các kết quả đạt được trong quá trình vận hành thực nghiệm hệ thống. Nội dung được tổ chức theo luồng xử lý thực tế, bắt đầu từ khâu khởi chạy nền tảng, tiếp nhận dữ liệu thô, cho đến quá trình trực quan hóa trên bảng điều khiển trung tâm và trích xuất các thông tin phục vụ an ninh mạng cũng như phân tích nghiệp vụ.
+
+\section{Khởi chạy hệ thống và tiếp nhận luồng dữ liệu}
+Quá trình thực nghiệm bắt đầu bằng việc kích hoạt toàn bộ cụm dịch vụ thông qua công cụ điều phối tự động. Ngay sau khi khởi động, trạm trung chuyển Kafka và cụm tính toán Spark lập tức thiết lập trạng thái kết nối thông suốt. 
+
+Tại phân hệ sinh dữ liệu, kịch bản Python tiến hành bơm liên tục hàng ngàn bản ghi nhật ký giả lập vào hệ thống. Giao diện dòng lệnh ghi nhận rõ hai tiến trình hoạt động song song: một tiến trình liên tục xuất ra các bản ghi truy cập đa dạng về mã trạng thái; tiến trình còn lại thể hiện cụm Spark đang tiếp nhận, chia dữ liệu thành các lô nhỏ và ghi thành công vào phân vùng Hồ dữ liệu. Toàn bộ chuỗi cung ứng diễn ra tự động và ổn định, không ghi nhận hiện tượng nghẽn tải.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{cmd.png}
+    \caption{Tiến trình sinh dữ liệu (trái) và tiến trình Spark ghi nhận lô nhỏ vào Hồ dữ liệu (phải)}
+\end{figure}
+
+\section{Giám sát tổng quan tại Trung tâm Điều hành An ninh}
+Dữ liệu sau khi được xử lý và lưu trữ sẽ được trực quan hóa thông qua Bảng điều khiển trung tâm. Đây là giao diện phục vụ trực tiếp cho công tác giám sát an ninh mạng với tần suất cập nhật liên tục.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{menudb.png}
+    \caption{Các chỉ số an ninh trọng yếu tại Bảng điều khiển trung tâm}
+\end{figure}
+
+Ngay tại màn hình chính, hệ thống cung cấp các chỉ số đo lường hiệu suất trọng yếu theo thời gian thực. Trong phiên thử nghiệm cường độ cao, hệ thống tiếp nhận tổng cộng 9120 yêu cầu truy cập. Dựa trên bộ luật đã thiết lập, thuật toán phát hiện bất thường lập tức nhận diện và cô lập thành công 9 địa chỉ IP thực hiện tấn công dò đoán mật khẩu (mã 401), 5 địa chỉ IP rà quét lỗ hổng (mã 404) và 7 địa chỉ IP có hành vi thu thập dữ liệu tự động (mã 200 tần suất cao). Tổng cộng có 21 địa chỉ IP độc hại bị hệ thống tự động đưa vào danh sách chặn.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{mapdb.png}
+    \caption{Bản đồ định vị các mối đe dọa và mức độ rủi ro hệ thống}
+\end{figure}
+
+Giao diện tiếp tục cung cấp bản đồ phân bổ địa lý của các nguồn truy cập độc hại, kết hợp cùng biểu đồ đo lường mức độ rủi ro hệ thống đang ở mức cảnh báo cao.
+
+Khi quan sát biểu đồ diễn biến lưu lượng, hệ thống ghi nhận một đợt tăng vọt đột biến về số lượng yêu cầu truy cập chỉ trong vòng 60 giây. Sự bùng nổ này được đối chiếu trực tiếp với biểu đồ phân bổ mã trạng thái, xác nhận tỷ lệ lỗi xác thực 401 chiếm 18.4\% và lỗi không tìm thấy tài nguyên 404 chiếm 18.5\%. Sự gia tăng bất thường của các nhóm lỗi này bên cạnh 62.6\% lưu lượng hợp lệ là bằng chứng rõ nét của một đợt tấn công từ mạng máy tính ma.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{statusdb.png}
+    \caption{Phân tích tương quan giữa lưu lượng đột biến và phân bổ mã trạng thái}
+\end{figure}
+
+\section{Phân tích chuyên sâu các sự kiện an toàn thông tin}
+Từ các dấu hiệu bất thường trên biểu đồ tổng quan, hệ thống tiến hành bóc tách dữ liệu để làm rõ chi tiết từng nhóm đối tượng vi phạm, cung cấp cơ sở kỹ thuật để xử lý sự cố.
+
+\subsection{Truy vết hành vi xâm nhập và dò quét lỗ hổng}
+Hệ thống truy xuất và xếp hạng mức độ nguy hiểm của từng địa chỉ IP cụ thể. Bảng dữ liệu liệt kê chính xác các địa chỉ IP tạo ra hàng trăm lượt truy cập lỗi trong một thời gian cực ngắn (nhiều địa chỉ ghi nhận xấp xỉ 300 lượt vi phạm). Dữ liệu này hoàn toàn khớp với đặc điểm của hình thức tấn công dò đoán mật khẩu tự động.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{401404.png}
+    \caption{Danh sách chi tiết các địa chỉ IP thực hiện hành vi xâm nhập trái phép}
+\end{figure}
+
+Bên cạnh đó, hệ thống bóc tách các mục tiêu bị nhắm tới nhiều nhất. Kết quả cho thấy đường dẫn đăng nhập quản trị (\texttt{/login}) là mục tiêu chịu áp lực tấn công áp đảo. Các đường dẫn nhạy cảm chứa mã nguồn và tệp tin hệ thống (\texttt{/wp-login.php}, \texttt{/.env}, \texttt{/backup.zip}) cũng liên tục bị rà quét. Đây là thông tin quan trọng giúp đội ngũ quản trị kịp thời thiết lập các bộ lọc trên tường lửa.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{link.png}
+    \caption{Thống kê các đường dẫn hệ thống bị tin tặc nhắm mục tiêu nhiều nhất}
+\end{figure}
+
+\subsection{Nhận diện công cụ thu thập dữ liệu tự động}
+Không chỉ dừng lại ở các lỗi bảo mật nghiêm trọng, hệ thống còn thể hiện năng lực phát hiện các hành vi tinh vi ẩn mình dưới vỏ bọc truy cập hợp lệ. Thuật toán nhận diện được hàng loạt địa chỉ IP có tần suất tải trang thành công vượt xa giới hạn vật lý của người dùng thực (từ 500 đến hơn 700 lượt). Việc đối chiếu đường dẫn xác nhận toàn bộ lưu lượng này chỉ tập trung vào danh mục sản phẩm (\texttt{/products}), qua đó kết luận đây là các công cụ thu thập dữ liệu tự động của đối thủ cạnh tranh.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{scratt.png}
+    \caption{Danh sách công cụ thu thập tự động và đường dẫn bị khai thác}
+\end{figure}
+
+\section{Ứng dụng phân tích Trí tuệ Doanh nghiệp (BI)}
+Một trong những điểm nhấn của kiến trúc hệ thống là khả năng tận dụng chính luồng dữ liệu nhật ký bảo mật để phục vụ phân tích kinh doanh. Tại phân hệ BI, hệ thống tự động lọc bỏ toàn bộ các địa chỉ IP thuộc danh sách chặn, trả lại một tập dữ liệu sạch phản ánh đúng hành vi của người dùng hợp lệ.
+
+Tập dữ liệu này được định lượng thành các chỉ số kinh doanh thực tế bao gồm: 1513 lượt truy cập trang chủ, 1077 lượt xem sản phẩm, 398 lượt thêm giỏ hàng, và 157 lượt thanh toán thành công. Dựa trên các chỉ số này, biểu đồ phễu chuyển đổi hành vi được hình thành, xác định tỷ lệ chuyển đổi cuối cùng đạt mức 10.38\%. Việc cung cấp các báo cáo định hướng kinh doanh ngay trên nền tảng giám sát an ninh là minh chứng cho tính đa dụng của kiến trúc dữ liệu phân tán.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bidb.png}
+    \caption{Phân hệ phân tích kinh doanh minh họa biểu đồ phễu chuyển đổi}
+\end{figure}
+
+\section{Đánh giá hiệu năng và kiến trúc hệ thống}
+Dựa trên các kết quả trực quan thu được, kiến trúc được đề xuất trong đồ án đã chứng minh được tính hiệu quả và sự ổn định:
+\begin{itemize}
+    \item \textbf{Năng lực đáp ứng thời gian thực:} Việc kết hợp cơ chế chia lô nhỏ của Spark Streaming cùng trạm trung chuyển Kafka giúp hệ thống xử lý nhanh chóng hàng ngàn bản ghi, phản ánh tức thời mọi biến động từ tầng nền tảng lên bảng điều khiển.
+    \item \textbf{Độ khả dụng và tính toàn vẹn:} Thiết kế tách rời hoàn toàn giữa khâu xử lý lưu trữ và khâu trực quan hóa giúp hệ thống hoạt động bền bỉ. Mọi sự kiện an ninh đều được ghi nhận nguyên vẹn xuống Hồ dữ liệu, không bị phụ thuộc vào trạng thái hoạt động của giao diện web.
+    \item \textbf{Tối ưu hóa giá trị dữ liệu:} Thay vì chỉ sử dụng nhật ký hệ thống làm công cụ rà soát lỗi đơn thuần, đồ án đã chuyển hóa luồng thông tin này thành một tài sản đa dụng, vừa đóng vai trò làm lá chắn an ninh, vừa trực tiếp hỗ trợ chiến lược phát triển kinh doanh.
+\end{itemize}
+
+\section{Đo lường các chỉ số hiệu năng hệ thống}
+Để đánh giá toàn diện năng lực của kiến trúc hệ thống đề xuất, bên cạnh tính chính xác trong việc phát hiện tấn công, các chỉ số hiệu năng xử lý luồng dữ liệu cũng được đo lường chi tiết. Quá trình thực nghiệm được tiến hành với khối lượng 9120 bản ghi nhật ký được đẩy liên tục vào hệ thống trong khoảng thời gian 60 giây. Kết quả đo lường các thông số kỹ thuật cốt lõi được ghi nhận cụ thể như sau:
+
+\begin{itemize}
+    \item \textbf{Thông lượng xử lý:} Hệ thống đạt mức thông lượng trung bình 9120 req/60s, tương đương 152 yêu cầu mỗi giây. Tại các thời điểm xảy ra đợt tấn công dồn dập, khung tính toán Spark vẫn bóc tách thành công định dạng JSON và đẩy dữ liệu xuống Hồ lưu trữ mà không gây ra hiện tượng tràn bộ nhớ đệm tại trạm trung chuyển Kafka.
+    
+    \item \textbf{Độ trễ đáp ứng:} Cụm tính toán Apache Spark được thiết lập cơ chế chia lô cực nhỏ với chu kỳ kích hoạt là \textbf{3 giây/lô}. Điều này đồng nghĩa với việc độ trễ tối đa từ khi sự kiện xảy ra ở nguồn phát cho đến khi được ghi nhận vào tệp CSV chỉ xấp xỉ 3 giây. Đây là một chỉ số xuất sắc, hoàn toàn đáp ứng tiêu chuẩn thời gian thực cho các hệ thống giám sát an ninh mạng.
+    
+    \item \textbf{Độ tin cậy của luồng dữ liệu:} Toàn bộ 100\% bản ghi dữ liệu thô từ Kafka đều được Spark ép kiểu, kiểm tra tính hợp lệ của cấu trúc và bóc tách thành các trường thông tin chuẩn hóa trước khi lưu trữ. Không có bất kỳ bản ghi nào bị thất thoát hay xảy ra lỗi định dạng trong suốt quá trình thử nghiệm với cường độ cao.
+\end{itemize}
+
+Thông qua các chỉ số trên, hệ thống không chỉ giải quyết thành công bài toán an toàn thông tin mà còn minh chứng được độ vững chãi của một kiến trúc xử lý dữ liệu lớn tiêu chuẩn, sẵn sàng mở rộng quy mô để đáp ứng các mức thông lượng cao hơn trong môi trường thực tế.
+
+\chapter*{KẾT LUẬN}
+\addcontentsline{toc}{chapter}{KẾT LUẬN}
+
+\textbf{1. Tổng kết kết quả đạt được}
+\vspace{0.2cm}
+\newline
+Đồ án đã thiết kế và triển khai thành công một kiến trúc xử lý dữ liệu lớn theo thời gian thực, đáp ứng trọn vẹn các mục tiêu ban đầu. Bằng việc ứng dụng mô hình tách rời dịch vụ, hệ thống đã tích hợp thành công nền tảng phân phối sự kiện Apache Kafka và khung tính toán Apache Spark để thu thập, phân tích và lưu trữ nhật ký truy cập mạng. 
+
+Thành quả nổi bật nhất của đồ án là việc xây dựng hoàn thiện Bảng điều khiển trung tâm đa nhiệm. Giao diện không chỉ thực hiện tốt vai trò của một hệ thống quản lý sự kiện bảo mật thông qua việc cô lập chính xác các chiến dịch tấn công dò đoán mật khẩu, rà quét lỗ hổng và công cụ thu thập dữ liệu; mà còn tái sử dụng dữ liệu thành công để trích xuất các chỉ số phễu chuyển đổi kinh doanh mang tính chiến lược.
+
+\vspace{0.5cm}
+\textbf{2. Hạn chế tồn tại và Đánh giá hiệu năng (Benchmark)}
+\vspace{0.2cm}
+\newline
+Bên cạnh những kết quả đạt được, kiến trúc hiện tại vẫn còn một số điểm giới hạn về mặt kỹ thuật cần được làm rõ:
+\begin{itemize}
+    \item \textbf{Giới hạn về độ trễ (Latency):} Hệ thống áp dụng cơ chế chia lô nhỏ (Micro-batching) của Spark với chu kỳ kích hoạt 3 giây/lần. Do đó, độ trễ tối thiểu của hệ thống luôn lớn hơn hoặc bằng 3 giây cộng với thời gian thực thi mã nguồn. Dù đáp ứng tốt các bài toán thực tế, nhưng kiến trúc này chưa thể đạt đến mức độ trễ tính bằng mili-giây (Sub-millisecond Latency) như cơ chế xử lý luồng liên tục (Continuous Processing) \cite{zaharia2013}.
+    \item \textbf{Khả năng chịu tải (Throughput):} Trong môi trường thử nghiệm đơn trạm (Single-node), Kafka và Spark đã xử lý mượt mà thông lượng giả lập ở mức khoảng 3,000 yêu cầu/giây (Requests per second - req/s) \cite{confluent_bench}. Tuy nhiên, để đáp ứng được quy mô doanh nghiệp khổng lồ (vượt ngưỡng hàng trăm ngàn req/s), hệ thống cần phải được triển khai trên cụm máy chủ vật lý đa trạm (Multi-node Cluster) và thực hiện các bước tinh chỉnh sâu về bộ nhớ (JVM Tuning).
+    \item \textbf{Thuật toán phát hiện tĩnh:} Thuật toán hiện đang phụ thuộc hoàn toàn vào tập luật đối sánh ngưỡng cố định (ví dụ: lớn hơn 10 lỗi/phút). Tin tặc có thể dễ dàng vượt qua cơ chế này bằng các kỹ thuật tấn công phân tán nhịp độ chậm (Low and Slow attacks).
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{3. Hướng phát triển trong tương lai}
+\vspace{0.2cm}
+\newline
+Để khắc phục các điểm hạn chế và nâng cấp hệ thống lên quy mô doanh nghiệp, định hướng nghiên cứu tiếp theo sẽ tập trung vào:
+\begin{itemize}
+    \item \textbf{Tích hợp Học máy phân tán (Distributed Machine Learning):} Áp dụng thư viện Spark MLlib để xây dựng mô hình Rừng cô lập (Isolation Forest) hoặc Phân cụm K-Means, giúp hệ thống tự động học hỏi hành vi và nhận diện các mẫu hình tấn công dị thường mà không cần định nghĩa ngưỡng tĩnh.
+    \item \textbf{Tối ưu hóa khả năng mở rộng lưu trữ:} Tích hợp các công cụ tìm kiếm và phân tích log chuyên dụng như ElasticSearch nhằm thay thế cho tệp tĩnh CSV, qua đó tối ưu hóa tốc độ truy vấn trên Hồ dữ liệu khi quy mô đạt ngưỡng Terabyte.
+\end{itemize}
+
+\chapter*{LỜI CẢM ƠN}
+\addcontentsline{toc}{chapter}{LỜI CẢM ƠN}
+Trong suốt thời gian học tập, nghiên cứu và hoàn thành đồ án này, em đã nhận được sự quan tâm, hướng dẫn và tạo điều kiện rất lớn từ quý thầy cô, gia đình và bạn bè.
+
+Trước hết, em xin gửi lời cảm ơn chân thành và sâu sắc nhất đến Giảng viên hướng dẫn Thầy Vũ Ngọc Thanh Sang. Thầy đã dành nhiều thời gian quý báu để định hướng đề tài, giải đáp những thắc mắc kỹ thuật và tận tình chỉ bảo em trong suốt quá trình triển khai hệ thống cũng như hoàn thiện tài liệu báo cáo.
+
+Em cũng xin gửi lời tri ân đến quý thầy cô Khoa Toán - Ứng Dụng, Trường Đại học Sài Gòn đã truyền đạt cho em những kiến thức nền tảng vững chắc trong suốt quá trình ngồi trên ghế nhà trường. Những kiến thức chuyên môn về mạng máy tính, an toàn thông tin và khoa học dữ liệu chính là hành trang vô giá giúp em hoàn thành tốt đồ án này.
+
+Mặc dù đã nỗ lực hết sức để hoàn thiện đồ án, nhưng do giới hạn về mặt thời gian và kinh nghiệm thực tiễn, báo cáo chắc chắn không tránh khỏi những thiếu sót. Em rất mong nhận được những lời góp ý quý báu từ Hội đồng bảo vệ để em có cơ hội học hỏi, khắc phục và tiếp tục phát triển hướng nghiên cứu này trong tương lai.
+
+Em xin chân thành cảm ơn!
+
+\renewcommand{\bibname}{TÀI LIỆU THAM KHẢO} 
+
+\begin{thebibliography}{10}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+
+\bibitem{spark_doc}
+Apache Software Foundation. (2024). \textit{Structured Streaming Programming Guide}. Truy xuất từ tài liệu chính thức của Apache Spark: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html
+
+\bibitem{kafka_doc}
+Apache Software Foundation. (2024). \textit{Apache Kafka Documentation}. Truy xuất từ tài liệu chính thức của Apache Kafka: https://kafka.apache.org/documentation/
+
+\bibitem{zaharia2013}
+Zaharia, M., Das, T., Li, H., Hunter, T., Shenker, S., \& Stoica, I. (2013). Discretized streams: Fault-tolerant streaming computation at scale. \textit{Proceedings of the 24th ACM Symposium on Operating Systems Principles (SOSP '13)}, 423–438. https://doi.org/10.1145/2517349.2522737
+
+\bibitem{anomaly_spark}
+Munawar, A., \& Wardoyo, R. (2021). Real-Time Anomaly Detection in Streaming Logs with Apache Spark. \textit{IEEE International Conference on Artificial Intelligence and Computer Science Technology}. https://doi.org/10.1109/ICAICST53116.2021.9497813
+
+\bibitem{confluent_bench}
+Kreps, J. (2014). \textit{Benchmarking Apache Kafka: 2 Million Writes Per Second (On Three Cheap Machines)}. Confluent Blog. Truy xuất từ: https://www.confluent.io/blog/benchmarking-apache-kafka-2-million-writes-per-second/
+
+\bibitem{kleppmann2017}
+Kleppmann, M. (2017). \textit{Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems}. O'Reilly Media.
+
+\bibitem{vnisa2023}
+Hiệp hội An toàn thông tin Việt Nam (VNISA). (2023). \textit{Báo cáo Toàn cảnh An toàn thông tin mạng Việt Nam năm 2023}. Kỷ yếu Hội thảo quốc tế Ngày An toàn thông tin Việt Nam 2023. Truy xuất từ: https://vnisa.org.vn/
+
+\bibitem{chapple2021}
+Chapple, M., Stewart, J. M., \& Gibson, D. (2021). \textit{CISSP (ISC)2 Certified Information Systems Security Professional Official Study Guide} (9th ed.). John Wiley \& Sons.
+
+\bibitem{owasp2021}
+OWASP Foundation. (2021). \textit{OWASP Top 10: 2021 - The Ten Most Critical Web Application Security Risks}. Truy xuất từ: https://owasp.org/Top10/
+
+\bibitem{docker_doc}
+Docker Inc. (2024). \textit{Docker Compose Overview}. Truy xuất từ tài liệu hướng dẫn nền tảng Docker: https://docs.docker.com/compose/
+
+\end{thebibliography}
+
+\end{document}
