@@ -92,18 +92,31 @@ Trước đây, quản trị viên an toàn thông tin thường sử dụng cá
 
 Thực tiễn đó đặt ra yêu cầu cấp thiết phải xây dựng một Trung tâm Điều hành An ninh thế hệ mới, gọi tắt là hệ thống SOC. Hệ thống này phải có khả năng tiếp nhận và phân tích dữ liệu nhật ký hệ thống theo thời gian thực để chặn đứng các mối đe dọa ngay khi chúng vừa khởi phát.
 
-\subsection{Lý do chọn đề tài}
-Từ bối cảnh nêu trên, việc ứng dụng các công nghệ xử lý dữ liệu lớn vào bài toán an toàn thông tin là một hướng đi thiết thực và đầy tiềm năng. Việc sử dụng nền tảng Apache Kafka để thu thập, điều phối luồng dữ liệu tốc độ cao và khung Apache Spark để tính toán trực tiếp trên bộ nhớ chính là chìa khóa để giải quyết triệt để bài toán độ trễ.
+\subsection{Các khái niệm và công nghệ nền tảng}
+Để làm rõ hướng giải quyết cho bài toán nêu trên, phần này sẽ giải thích bản chất của các khái niệm và công nghệ cốt lõi được sử dụng xuyên suốt đồ án:
 
-Hơn nữa, một luồng dữ liệu nhật ký hệ thống không chỉ có giá trị về mặt giám sát bảo mật mà còn chứa đựng vô vàn thông tin hữu ích về hành vi người dùng, phục vụ cho công tác phân tích và thống kê của doanh nghiệp. Do đó, đề tài \textbf{"Xây dựng hệ thống SOC phân tích dữ liệu lớn với Kafka và Spark"} được lựa chọn nhằm kết hợp kiến thức chuyên ngành vào một bài toán thực tế, mang lại góc nhìn đa chiều: vừa bảo vệ hệ thống, vừa tận dụng triệt để nguồn dữ liệu sẵn có.
+\begin{itemize}
+    \item \textbf{Nhật ký hệ thống (Log):} Là các tệp dữ liệu tự động ghi lại mọi hoạt động xảy ra trên máy chủ (ai vừa truy cập, địa chỉ IP là gì, hành động thành công hay thất bại). Đây chính là nguồn "nguyên liệu" đầu vào để hệ thống tiến hành phân tích.
+    
+    \item \textbf{Mạng máy tính ma (Botnet) và Tấn công dò đoán mật khẩu (Brute Force):} Kẻ tấn công thường khống chế hàng ngàn máy tính của người dùng bình thường tạo thành một mạng lưới (Botnet). Chúng điều khiển mạng lưới này cùng lúc gửi hàng triệu lượt thử mật khẩu sai (Brute Force) nhằm làm sập hệ thống hoặc đánh cắp tài khoản.
+    
+    \item \textbf{Apache Kafka (Trạm trung chuyển dữ liệu):} Về bản chất, Kafka là một hệ thống điều phối và truyền tải dữ liệu tốc độ cao. Khi website bị tấn công, dữ liệu nhật ký sinh ra ồ ạt như một cơn lũ. Nếu đổ trực tiếp lượng dữ liệu này vào hệ thống phân tích, máy chủ chắc chắn sẽ quá tải. Kafka ra đời để đóng vai trò như một "hồ chứa nước đệm". Nó hứng chịu toàn bộ lưu lượng khổng lồ từ máy chủ web, lưu trữ tạm thời một cách an toàn, rồi điều tiết dòng chảy đó sang cho các bộ phận xử lý phía sau với tốc độ phù hợp, giúp toàn bộ kiến trúc không bao giờ bị nghẽn.
+    
+    \item \textbf{Apache Spark (Khung tính toán trực tiếp trên bộ nhớ):} Nếu Kafka là người vận chuyển, thì Spark chính là "bộ não" xử lý. Đặc điểm làm nên sức mạnh của Spark là khả năng tính toán trực tiếp trên bộ nhớ RAM thay vì phải ghi và đọc dữ liệu liên tục từ ổ cứng như các công nghệ cũ. Nhờ vậy, Spark có thể hút dữ liệu liên tục từ Kafka, thực hiện đếm số lượt truy cập, gom nhóm các địa chỉ IP và phát hiện ra các điểm bất thường gần như ngay lập tức.
+\end{itemize}
+
+\subsection{Lý do chọn đề tài}
+Từ những khái niệm trên, có thể thấy việc ứng dụng các công nghệ xử lý dữ liệu lớn vào bài toán an toàn thông tin là một hướng đi thiết thực và đầy tiềm năng. Sự kết hợp hoàn hảo giữa khả năng chịu tải tuyệt vời của Kafka và tốc độ xử lý tức thời của Spark chính là lời giải trọn vẹn cho bài toán độ trễ trong giám sát hệ thống.
+
+Hơn nữa, một luồng dữ liệu nhật ký không chỉ có giá trị về mặt phát hiện mã độc mà còn chứa đựng vô vàn thông tin hữu ích về hành vi người dùng, phục vụ cho công tác phân tích và thống kê của doanh nghiệp. Do đó, đề tài \textbf{"Xây dựng hệ thống SOC phân tích dữ liệu lớn với Kafka và Spark"} được lựa chọn nhằm kết hợp kiến thức chuyên ngành vào một bài toán thực tế, mang lại góc nhìn đa chiều: vừa bảo vệ hệ thống nền tảng, vừa tận dụng triệt để nguồn dữ liệu sẵn có.
 
 \section{Mục tiêu và phạm vi nghiên cứu}
 \subsection{Mục tiêu nghiên cứu}
 Đồ án được thực hiện với các mục tiêu cụ thể sau:
 \begin{itemize}
-    \item \textbf{Về mặt lý thuyết:} Nghiên cứu và hiểu rõ kiến trúc, nguyên lý hoạt động của hệ sinh thái dữ liệu lớn hiện đại, đặc biệt là nền tảng phân phối thông điệp Apache Kafka và khung xử lý dữ liệu luồng Apache Spark.
+    \item \textbf{Về mặt lý thuyết:} Nghiên cứu và hiểu rõ kiến trúc, nguyên lý hoạt động của hệ sinh thái dữ liệu lớn hiện đại, đặc biệt là luồng xử lý thời gian thực thông qua Kafka và Spark.
     \item \textbf{Về mặt thực hành:} Tự xây dựng và triển khai thành công một luồng dữ liệu thông suốt từ khâu thu thập, xử lý trực tiếp đến khâu trực quan hóa lên bảng điều khiển.
-    \item \textbf{Về mặt ứng dụng:} Xây dựng thuật toán phát hiện bất thường dựa trên ngưỡng thống kê để nhận diện các địa chỉ IP có hành vi tấn công dò đoán mật khẩu hoặc thu thập dữ liệu, đồng thời tự động đưa vào danh sách chặn.
+    \item \textbf{Về mặt ứng dụng:} Xây dựng thuật toán phát hiện bất thường dựa trên ngưỡng thống kê để tự động nhận diện các địa chỉ IP có hành vi tấn công và đưa vào danh sách chặn.
 \end{itemize}
 
 \subsection{Phạm vi giới hạn của đồ án}
@@ -119,27 +132,13 @@ Do giới hạn về thời gian và tài nguyên phần cứng, đồ án tập
 Đồ án cung cấp một mô hình thu nhỏ nhưng bao hàm đầy đủ các thành phần cốt lõi của một nền tảng dữ liệu lớn thực tế. Kết quả của đồ án mang lại những giá trị rõ nét trên ba phương diện:
 
 \begin{itemize}
-    \item \textbf{Về mặt vận hành an ninh:} Hệ thống chứng minh khả năng thay thế các công cụ rà soát lỗi thủ công vốn có độ trễ cao. Nhờ phân tích dữ liệu trực tiếp trên bộ nhớ, hệ thống giúp đội ngũ bảo mật tự động nhận diện và trích xuất danh sách các địa chỉ IP độc hại gần như tức thời. Đây là tiền đề quan trọng để tích hợp với tường lửa, giúp tự động chặn đứng tin tặc.
+    \item \textbf{Về mặt vận hành an ninh:} Hệ thống chứng minh khả năng thay thế các công cụ rà soát lỗi thủ công vốn có độ trễ cao. Nhờ phân tích dữ liệu trực tiếp trên bộ nhớ, hệ thống giúp đội ngũ bảo mật tự động nhận diện và trích xuất danh sách các địa chỉ IP độc hại gần như tức thời. Đây là tiền đề quan trọng để tích hợp với hệ thống tường lửa, giúp tự động chặn đứng tin tặc từ sớm.
     
-    \item \textbf{Về mặt tận dụng dữ liệu thống kê:} Đồ án khẳng định sự đa dụng của hệ thống phân tích luồng. Cùng một nguồn dữ liệu đầu vào, ngoài việc phát hiện mã độc, hệ thống có thể đồng thời trích xuất các thông tin về lưu lượng truy cập hay tỷ lệ lỗi máy chủ. Quản trị viên có thể theo dõi sức khỏe website liên tục mà không gây thêm áp lực xử lý cho cơ sở dữ liệu chính.
+    \item \textbf{Về mặt tận dụng dữ liệu thống kê:} Đồ án khẳng định sự đa dụng của nền tảng phân tích luồng. Cùng một nguồn dữ liệu đầu vào, ngoài việc phát hiện mã độc, hệ thống có thể đồng thời trích xuất các thông tin về lưu lượng truy cập hay tỷ lệ lỗi máy chủ. Quản trị viên có thể theo dõi sức khỏe website liên tục mà không gây thêm áp lực xử lý cho cơ sở dữ liệu chính yếu của doanh nghiệp.
     
-    \item \textbf{Về mặt kiến trúc công nghệ:} Việc sử dụng Kafka làm trạm trung chuyển giúp tách biệt hoàn toàn máy chủ web sinh dữ liệu và cụm phân tích phía sau. Nhờ thiết kế này, hệ thống có khả năng mở rộng linh hoạt và chịu lỗi cực tốt, duy trì sự ổn định ngay cả khi lượng truy cập tăng đột biến.
+    \item \textbf{Về mặt kiến trúc công nghệ:} Việc sử dụng trạm trung chuyển Kafka giúp tách biệt hoàn toàn cụm máy chủ web (nơi sinh dữ liệu) và cụm phân tích phía sau. Nhờ thiết kế phân tán này, hệ thống có khả năng mở rộng linh hoạt và chịu lỗi cực tốt, duy trì sự hoạt động nhịp nhàng ngay cả khi đối mặt với lượng truy cập tăng đột biến.
 \end{itemize}
 
-\section{Các khái niệm và thuật ngữ cơ bản}
-Để làm rõ bối cảnh và vai trò của các công nghệ được áp dụng trong đồ án, phần này sẽ giải thích ngắn gọn các thuật ngữ cốt lõi:
-
-\begin{itemize}
-    \item \textbf{Hệ thống SOC (Trung tâm Điều hành An ninh):} Là bộ phận chịu trách nhiệm giám sát, phát hiện và phản ứng với các sự cố an toàn thông tin. Trong đồ án này, SOC đóng vai trò như một đài quan sát tự động, liên tục quét các dòng dữ liệu để tìm ra kẻ tấn công.
-    
-    \item \textbf{Nhật ký hệ thống (Log):} Là các tệp dữ liệu tự động ghi lại mọi hoạt động xảy ra trên máy chủ (ai vừa truy cập, truy cập vào lúc nào, thành công hay thất bại). Đây chính là nguồn "nguyên liệu" đầu vào để hệ thống phân tích.
-    
-    \item \textbf{Mạng máy tính ma (Botnet) và Tấn công dò đoán mật khẩu (Brute Force):} Kẻ tấn công thường khống chế hàng ngàn máy tính của người dùng bình thường tạo thành một mạng lưới (Botnet). Chúng điều khiển mạng lưới này cùng lúc gửi hàng triệu lượt thử mật khẩu sai (Brute Force) để làm sập hệ thống hoặc đánh cắp tài khoản. Đồ án sẽ giả lập kịch bản tấn công này để kiểm tra độ nhạy của hệ thống giám sát.
-    
-    \item \textbf{Apache Kafka (Trạm trung chuyển dữ liệu):} Khi website bị tấn công, lượng dữ liệu sinh ra là quá lớn, nếu đẩy thẳng vào bộ phận phân tích thì hệ thống sẽ bị treo. Kafka đứng ở giữa, đóng vai trò như một bộ đệm khổng lồ. Nó hứng toàn bộ dữ liệu từ máy chủ web và xếp hàng gọn gàng, giúp hệ thống không bao giờ bị quá tải.
-    
-    \item \textbf{Apache Spark (Khung tính toán trực tiếp trên bộ nhớ):} Đóng vai trò là "bộ não" của hệ thống. Thay vì lưu dữ liệu xuống ổ cứng rồi mới phân tích (rất chậm), Spark liên tục kéo dữ liệu từ trạm trung chuyển Kafka ra và thực hiện tính toán ngay trên bộ nhớ RAM. Nhờ đó, nó có thể đếm và phát hiện ra các địa chỉ IP đang tấn công chỉ trong chớp mắt.
-\end{itemize}
 % ---------------- CHƯƠNG II ----------------
 \chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG NGHỆ}
 
