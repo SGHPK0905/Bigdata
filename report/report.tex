@@ -31,14 +31,23 @@
 
 % ================= TRANG BÌA =================
 \begin{titlepage}
-    % Vẽ khung viền kép chuẩn đồ án
+    % Vẽ khung viền kép (đã mở rộng và tô màu xanh biển nhạt)
     \begin{tikzpicture}[remember picture, overlay]
-        \draw[line width = 2pt] ($(current page.north west) + (2.5cm,-2cm)$) rectangle ($(current page.south east) + (-1.5cm,2cm)$);
-        \draw[line width = 0.5pt] ($(current page.north west) + (2.6cm,-2.1cm)$) rectangle ($(current page.south east) + (-1.6cm,2.1cm)$);
+        % Viền ngoài đậm, màu xanh biển
+        \draw[color=cyan!70!blue, line width = 2pt] 
+            ($(current page.north west) + (2cm,-1.5cm)$) 
+            rectangle 
+            ($(current page.south east) + (-1.2cm,1.5cm)$);
+        
+        % Viền trong mảnh, màu xanh biển
+        \draw[color=cyan!70!blue, line width = 0.5pt] 
+            ($(current page.north west) + (2.1cm,-1.6cm)$) 
+            rectangle 
+            ($(current page.south east) + (-1.3cm,1.6cm)$);
     \end{tikzpicture}
 
     \begin{center}
-        \vspace*{0.8cm} % ĐÃ SỬA: Đẩy cụm chữ trên cùng lùi xuống cách xa viền
+        \vspace*{0.8cm}
         \textbf{\large BỘ GIÁO DỤC VÀ ĐÀO TẠO} \\[0.2cm]
         \textbf{\Large TRƯỜNG ĐẠI HỌC SÀI GÒN} \\[0.2cm]
         \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[1.5cm]
@@ -60,7 +69,7 @@
 
         \vfill
         {\large TP Hồ Chí Minh, năm 2024}
-        \vspace*{0.5cm} % ĐÃ SỬA: Đẩy dòng năm lùi lên trên một chút để không dính viền dưới
+        \vspace*{0.5cm}
     \end{center}
 \end{titlepage}
 
