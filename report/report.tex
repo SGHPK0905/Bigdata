@@ -128,6 +128,21 @@ Do giới hạn về thời gian và tài nguyên phần cứng, đồ án tập
     \item \textbf{Trực quan hóa:} Giao diện giám sát được phát triển bằng ngôn ngữ Python kết hợp với các thư viện hỗ trợ vẽ biểu đồ động.
 \end{itemize}
 
+\section{Câu hỏi nghiên cứu}
+Để bám sát các mục tiêu đã đề ra và làm cơ sở đánh giá tính hiệu quả của hệ thống, đồ án tập trung giải quyết các câu hỏi nghiên cứu trọng tâm sau:
+\begin{itemize}
+    \item \textbf{Khả năng chịu tải (Throughput):} Nền tảng Apache Kafka có khả năng tiếp nhận và điều phối ổn định lưu lượng nhật ký truy cập (log traffic) lên tới bao nhiêu yêu cầu mỗi giây (requests/second) trước khi xảy ra hiện tượng mất mát dữ liệu?
+    \item \textbf{Độ trễ xử lý (Latency):} Khung tính toán Apache Spark Structured Streaming có thể rút ngắn thời gian phát hiện dấu hiệu tấn công từ lúc log được sinh ra cho đến khi đưa IP vào danh sách chặn xuống mức bao nhiêu giây?
+    \item \textbf{Ngưỡng phát hiện (Thresholding):} Làm thế nào để xác định được cửa sổ thời gian (Time Window) và ngưỡng giới hạn số lỗi truy cập (Error Rate Threshold) phù hợp để phân biệt chính xác giữa một cuộc tấn công Brute Force/Botnet và các truy cập lỗi thông thường của người dùng thực?
+\end{itemize}
+
+\section{Các hệ thống và giải pháp tương đương (Related Works)}
+Trên thực tế, bài toán quản lý và phân tích log đã được nhiều hệ thống SIEM truyền thống giải quyết, điển hình như ELK Stack (Elasticsearch, Logstash, Kibana) hay Splunk. Các hệ thống này cung cấp khả năng lưu trữ và tìm kiếm dữ liệu toàn văn bản cực kỳ mạnh mẽ. 
+
+Tuy nhiên, nhược điểm cốt lõi của các giải pháp này là chủ yếu dựa trên cơ chế đánh chỉ mục (Indexing-based) dữ liệu tĩnh. Nghĩa là dữ liệu phải được ghi xuống ổ cứng và lập chỉ mục xong thì mới có thể chạy truy vấn cảnh báo. Khi đối mặt với kịch bản bị tấn công từ chối dịch vụ (DDoS) hoặc Botnet cường độ cao, cơ chế ghi ổ cứng liên tục này sẽ tạo ra nút thắt cổ chai (Bottleneck), khiến hệ thống có độ trễ lớn và thậm chí tự sập trước khi kịp phát ra cảnh báo.
+
+Việc ứng dụng kiến trúc Kafka kết hợp Spark Streaming trong đồ án này mang lại một hướng tiếp cận khác biệt: \textbf{Xử lý dữ liệu đang bay (Data in-motion)}. Hệ thống không cần ghi dữ liệu thô xuống đĩa mà thực hiện gom nhóm và đếm trực tiếp trên bộ nhớ RAM (In-Memory Micro-batching), từ đó khắc phục triệt để nhược điểm độ trễ của các công cụ truyền thống trong các kịch bản tấn công khẩn cấp.
+
 \section{Ý nghĩa thực tiễn}
 Đồ án cung cấp một mô hình thu nhỏ nhưng bao hàm đầy đủ các thành phần cốt lõi của một nền tảng dữ liệu lớn thực tế. Kết quả của đồ án mang lại những giá trị rõ nét trên ba phương diện:
 
@@ -142,47 +157,61 @@ Do giới hạn về thời gian và tài nguyên phần cứng, đồ án tập
 % ---------------- CHƯƠNG II ----------------
 \chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG NGHỆ}
 
-\section{Khái quát về Xử lý dữ liệu lớn (Big Data)}
-\subsection{Đặc trưng của dữ liệu lớn (Mô hình 3V/5V)}
-Dữ liệu lớn (Big Data) không chỉ đơn thuần là sự gia tăng về mặt dung lượng lưu trữ, mà còn bao hàm sự phức tạp trong việc thu thập và xử lý. Mô hình truyền thống mô tả Big Data qua 3 đặc trưng cốt lõi:
+\section{Khái quát về Xử lý dữ liệu lớn}
+\subsection{Đặc trưng của dữ liệu lớn}
+Dữ liệu lớn không chỉ đơn thuần là sự gia tăng về mặt dung lượng lưu trữ, mà còn bao hàm sự phức tạp trong khâu thu thập và phân tích. Theo mô hình tiêu chuẩn, một hệ thống dữ liệu lớn được định hình qua năm đặc trưng cốt lõi:
+
 \begin{itemize}
-    \item \textbf{Volume (Dung lượng):} Lượng dữ liệu khổng lồ sinh ra liên tục. Đối với hệ thống SOC, đây là hàng triệu dòng log truy cập web mỗi ngày.
-    \item \textbf{Velocity (Tốc độ):} Yêu cầu phải được xử lý tức thời (Real-time) để phát hiện tấn công.
-    \item \textbf{Variety (Đa dạng):} Dữ liệu đến từ nhiều nguồn và định dạng khác nhau (JSON, XML, Text).
+    \item \textbf{Dung lượng:} Khối lượng dữ liệu khổng lồ sinh ra liên tục. Đối với hệ thống giám sát an ninh, đây là hàng triệu dòng nhật ký truy cập mạng sinh ra mỗi ngày.
+    \item \textbf{Tốc độ:} Yêu cầu luồng dữ liệu phải được tiếp nhận và xử lý tức thời để đáp ứng các bài toán cần phản ứng nhanh như phát hiện tấn công.
+    \item \textbf{Đa dạng:} Dữ liệu đến từ nhiều nguồn máy chủ, thiết bị mạng khác nhau với các định dạng không đồng nhất như văn bản thuần, JSON hay định dạng mở rộng XML.
+    \item \textbf{Tính xác thực:} Đòi hỏi độ tin cậy và tính toàn vẹn của dữ liệu đầu vào. Việc đảm bảo tính xác thực giúp hệ thống phân tích tránh được các cảnh báo sai hoặc nhận diện nhầm người dùng hợp lệ thành tin tặc.
+    \item \textbf{Giá trị:} Là quá trình chắt lọc, biến đổi một luồng nhật ký hệ thống khô khan thành các cảnh báo bảo mật có giá trị thực tiễn cao.
 \end{itemize}
-Ngày nay, mô hình này mở rộng thành 5V với \textbf{Veracity (Tính xác thực)} - đảm bảo độ tin cậy của dữ liệu log để tránh nhận diện sai (False Positive), và \textbf{Value (Giá trị)} - khả năng trích xuất thông tin hữu ích (như IP tấn công hoặc phễu chuyển đổi hành vi).
 
-\subsection{Xử lý theo lô (Batch) và Xử lý luồng (Stream Processing)}
-Trong xử lý dữ liệu truyền thống, dữ liệu thường được lưu trữ tĩnh trong các cơ sở dữ liệu và được truy vấn định kỳ (Batch Processing). Cách này phù hợp để làm báo cáo tổng kết nhưng hoàn toàn bất lực trước các cuộc tấn công mạng đang diễn ra.
+\subsection{Xử lý theo lô và Xử lý theo luồng}
+Trước khi đi sâu vào các kiến trúc dữ liệu, cần phân biệt rõ hai mô hình tính toán nền tảng hiện nay:
+\begin{itemize}
+    \item \textbf{Xử lý theo lô (Batch Processing):} Là phương pháp tổng hợp và tích lũy dữ liệu thành các tập hợp lớn trong một chu kỳ thời gian nhất định (ví dụ: một giờ, một ngày). Sau khi kết thúc chu kỳ, hệ thống mới tiến hành xử lý toàn bộ khối lượng dữ liệu đó cùng một lúc.
+    \item \textbf{Xử lý theo luồng (Stream Processing):} Là phương pháp xử lý dữ liệu liên tục. Hệ thống sẽ tiếp nhận và thực hiện tính toán ngay lập tức trên từng bản ghi (hoặc các lô dữ liệu cực nhỏ) ngay tại thời điểm chúng vừa được sinh ra.
+\end{itemize}
 
-Ngược lại, đối với các hệ thống hiện đại như giám sát an ninh mạng, dữ liệu log máy chủ được sinh ra liên tục dưới dạng một luồng bất tận. Lúc này, phương pháp xử lý luồng (Stream Processing) trở nên thiết yếu. Nó cho phép hệ thống tính toán các phép phân tích thống kê ngay tại thời điểm bản ghi dữ liệu vừa được sinh ra. Điều này giúp giảm thiểu độ trễ (latency) từ hàng giờ xuống chỉ còn vài mili-giây, đáp ứng yêu cầu phản ứng nhanh trước các sự cố.
+Trong kiến trúc dữ liệu truyền thống, phương pháp xử lý theo lô thường được ưu tiên áp dụng. Dữ liệu được lưu trữ tĩnh trong các cơ sở dữ liệu và truy vấn định kỳ. Phương pháp này rất hiệu quả trong việc kết xuất báo cáo tổng kết, nhưng lại thiếu tính đáp ứng thời gian thực khi đối mặt với các cuộc tấn công mạng đang diễn ra.
 
-\section{Nền tảng phân phối thông điệp Apache Kafka}
-\subsection{Kiến trúc tổng quan của Kafka}
-Apache Kafka là một nền tảng truyền phát sự kiện phân tán (Distributed Event Streaming Platform) mã nguồn mở. Kiến trúc của Kafka giải quyết triệt để bài toán nút thắt cổ chai (bottleneck) trong truyền tải dữ liệu giữa nhiều hệ thống.
+Để khắc phục độ trễ hệ thống, các nền tảng giám sát hiện đại bắt buộc phải chuyển dịch sang phương pháp xử lý theo luồng. Đối với bài toán an ninh mạng, xử lý luồng giúp giảm thiểu độ trễ từ mức hàng giờ xuống chỉ còn vài phần nghìn giây. Điều này cho phép hệ thống nhận diện và cảnh báo tức thời các dấu hiệu bất thường, mang ý nghĩa quyết định trong việc ngăn chặn kịp thời các sự cố rò rỉ hoặc ngưng trệ dịch vụ.
 
-Nó hoạt động theo mô hình Publish-Subscribe và đóng vai trò như một bộ đệm (Buffer) khổng lồ: nơi các chương trình sinh dữ liệu (Producers) đẩy thông điệp vào, và các chương trình xử lý (Consumers) kéo dữ liệu ra. Việc tách biệt (decouple) hoàn toàn này giúp hệ thống xử lý phía sau (như Spark) không bị quá tải hay sập nguồn khi lượng người truy cập website tăng đột biến (Spike traffic).
+\section{Nền tảng phân phối sự kiện Apache Kafka}
+\subsection{Kiến trúc kỹ thuật của Kafka}
+Apache Kafka được xây dựng dựa trên kiến trúc phân tán với khả năng mở rộng hệ thống theo chiều ngang. Cốt lõi của Kafka là một cụm máy chủ bao gồm nhiều trạm trung gian làm nhiệm vụ điều phối luồng thông điệp.
 
-\subsection{Cơ chế lưu trữ và hoạt động (Topic, Partition)}
-Luồng dữ liệu trong Kafka được tổ chức theo các \textbf{Topic} (Chủ đề). Để đảm bảo khả năng mở rộng, mỗi Topic được chia nhỏ thành các \textbf{Partition} (Phân vùng). Dữ liệu ghi vào Partition mang tính tuần tự và bất biến, cho phép các Consumer đọc dữ liệu một cách độc lập và song song với tốc độ cực cao.
+Mô hình giao tiếp của Kafka tuân theo cơ chế Xuất bản và Đăng ký. Điểm tạo nên tốc độ cực cao của Kafka so với các hệ thống hàng đợi truyền thống là khả năng ghi dữ liệu trực tiếp xuống ổ cứng một cách tuần tự, kết hợp với việc tận dụng tối đa bộ nhớ đệm của hệ điều hành. Cơ chế này cho phép Kafka tiếp nhận hàng triệu tin nhắn mỗi giây mà vẫn đảm bảo luồng dữ liệu không bị nghẽn và không bị mất mát khi xảy ra sự cố.
+
+\subsection{Cơ chế phân vùng và nhóm tiêu thụ}
+Để đảm bảo tốc độ đọc ghi song song, luồng thông điệp trong Kafka được tổ chức chặt chẽ theo các chủ đề và chia nhỏ thành nhiều phân vùng. Dữ liệu khi ghi vào phân vùng mang tính bất biến và được đánh số thứ tự để hệ thống dễ dàng theo dõi.
+
+Đặc biệt, Kafka cung cấp cơ chế Nhóm tiêu thụ để phân tán khối lượng công việc. Nhiều máy chủ xử lý ở đầu ra có thể kết hợp thành một nhóm để cùng nhau đọc dữ liệu. Kafka sẽ tự động chia đều các phân vùng dữ liệu cho từng máy chủ trong nhóm. Nhờ cơ chế này, khi lưu lượng truy cập tăng vọt khiến hệ thống bị quá tải, quản trị viên chỉ cần bổ sung thêm máy chủ mới vào nhóm là khả năng xử lý sẽ lập tức được nhân lên một cách linh hoạt.
 
 \section{Khung tính toán phân tán Apache Spark}
-\subsection{Giới thiệu về Apache Spark và xử lý In-Memory}
-Apache Spark là một hệ thống tính toán phân tán song song hoạt động trên bộ nhớ RAM (In-Memory Computing). Khác với các công cụ thế hệ cũ như Hadoop MapReduce thường phải ghi dữ liệu trung gian xuống ổ cứng gây chậm trễ, Spark thực hiện phần lớn các tác vụ trên RAM, đem lại tốc độ xử lý vượt trội, cực kỳ phù hợp cho bài toán theo thời gian thực.
+\subsection{Cơ chế tính toán trực tiếp trên bộ nhớ}
+Sức mạnh của Apache Spark nằm ở kiến trúc lõi với cấu trúc dữ liệu nền tảng RDD (tập dữ liệu phân tán có khả năng phục hồi). Cấu trúc này cho phép chia nhỏ dữ liệu và phân tán trên bộ nhớ RAM của nhiều máy trạm để tính toán song song. Khác với các công cụ thế hệ cũ thường phải đọc và ghi dữ liệu trung gian liên tục xuống ổ cứng gây chậm trễ, Spark thực hiện phần lớn các tác vụ trực tiếp trên RAM, đem lại tốc độ xử lý vượt trội.
 
-\subsection{Mô hình Spark Structured Streaming}
-Trong đồ án này, công nghệ Spark Structured Streaming được áp dụng làm "bộ não" xử lý. Kỹ thuật này coi luồng dữ liệu thời gian thực như một bảng quan hệ vô hạn (Unbounded Table) đang liên tục được bổ sung dòng mới.
+Spark tối ưu hóa lộ trình tính toán bằng cách xây dựng một đồ thị luồng công việc có hướng. Hệ thống sử dụng cơ chế tính toán lười, tức là gom các phép biến đổi lại và chỉ thực thi khi có lệnh xuất kết quả. Kỹ thuật này giúp tiết kiệm tối đa tài nguyên máy tính và loại bỏ các thao tác xử lý dư thừa.
 
-Bằng cơ chế chia lô cực nhỏ (Micro-batching), hệ thống có thể áp dụng các truy vấn SQL chuẩn (như Gom nhóm \textit{groupBy}, Đếm \textit{count}) lên luồng dữ liệu một cách dễ dàng. Đồng thời, cơ chế này cũng đảm bảo tính nhất quán và khả năng chịu lỗi (Fault-tolerance) nhờ việc lưu lại các checkpoint trong quá trình chạy.
+\subsection{Xử lý luồng có cấu trúc và Khung thời gian}
+Đồ án áp dụng kỹ thuật xử lý luồng có cấu trúc của Spark. Kỹ thuật này coi luồng dữ liệu đang chảy liên tục như một bảng cơ sở dữ liệu vô hạn, nơi các dòng dữ liệu mới liên tục được đẩy vào. Hệ thống sẽ áp dụng cơ chế chia dữ liệu thành các lô cực nhỏ để tính toán và cập nhật kết quả liên tục từng giây.
 
-\section{Ứng dụng trong An toàn thông tin (Hệ thống SIEM)}
-\subsection{Khái niệm về hệ thống SIEM}
-SIEM (Security Information and Event Management) là giải pháp quản lý sự kiện và thông tin bảo mật. Nhiệm vụ cốt lõi của SIEM là thu thập log từ nhiều nguồn (máy chủ, tường lửa, ứng dụng), sau đó tương quan và phân tích dữ liệu để phát hiện các dấu hiệu bất thường, cung cấp cái nhìn toàn cảnh về bức tranh an ninh của doanh nghiệp.
+Đặc biệt, Spark cung cấp cơ chế tính toán theo khung thời gian cố định. Thay vì phân tích toàn bộ lịch sử dữ liệu từ trước đến nay, Spark cho phép cắt thời gian thực thành các đoạn ngắn (ví dụ mỗi phút là một khung) để gom nhóm và tổng hợp dữ liệu riêng biệt trong khung đó. Đây là công cụ đắc lực để giám sát sự gia tăng đột biến của các sự kiện an ninh.
 
-\subsection{Kỹ thuật tấn công Brute Force và cơ chế phát hiện}
-Tấn công Brute Force (dò đoán mật khẩu) là một trong những phương thức xâm nhập phổ biến nhất. Kẻ tấn công thường sử dụng một mạng lưới các máy tính bị nhiễm mã độc (Botnet) để tự động gửi hàng ngàn yêu cầu đăng nhập với các tổ hợp tài khoản/mật khẩu khác nhau.
+\section{Ứng dụng trong An toàn thông tin}
+\subsection{Khái niệm về hệ thống quản lý sự kiện bảo mật}
+Hệ thống quản lý sự kiện bảo mật (gọi tắt là SIEM) có nhiệm vụ cốt lõi là thu thập nhật ký từ hàng loạt thiết bị phần cứng, máy chủ và ứng dụng trong mạng nội bộ. Sau đó, hệ thống tiến hành đối chiếu các sự kiện rời rạc này lại với nhau để phân tích và phát hiện ra các hành vi thâm nhập bất hợp pháp, cung cấp cái nhìn toàn cảnh về bức tranh an ninh của doanh nghiệp.
 
-Đặc điểm nhận dạng của loại tấn công này là tần suất xuất hiện dày đặc của các mã trạng thái HTTP lỗi (ví dụ: 401 Unauthorized) từ cùng một địa chỉ IP. Trong phạm vi đồ án, công nghệ Big Data được ứng dụng để liên tục giám sát trạng thái này. Bằng cách đếm số lượng phản hồi 401 của mỗi IP, nếu con số này vượt qua một ngưỡng (Threshold) được định trước trong một cửa sổ thời gian (Time Window), hệ thống sẽ tự động ghi nhận đó là hành vi độc hại và xuất IP đó ra danh sách chặn (Blacklist).
+\subsection{Cơ chế phát hiện tấn công dò đoán mật khẩu}
+Trong an ninh mạng, tấn công dò đoán mật khẩu thường được thực hiện thông qua việc điều khiển hàng ngàn máy tính bị nhiễm mã độc để tự động gửi yêu cầu đăng nhập liên tục vào hệ thống. Dấu hiệu nhận biết rõ nét nhất của hình thức này là tần suất xuất hiện dày đặc của các phản hồi lỗi xác thực (mã lỗi 401) xuất phát từ cùng một địa chỉ IP.
+
+Để tự động hóa việc phát hiện, hệ thống Spark sẽ tiếp nhận luồng dữ liệu định dạng JSON từ máy chủ web, sau đó bóc tách để trích xuất ra hai thông tin then chốt: địa chỉ IP nguồn và mã trạng thái HTTP. 
+
+Thuật toán phát hiện được thiết lập dựa trên giới hạn ngưỡng kết hợp với khung thời gian cố định. Cụ thể, hệ thống sẽ cắt thời gian thực thành các khung liên tiếp nhau (ví dụ 1 phút mỗi khung). Bên trong mỗi khung thời gian này, Spark tiến hành gom nhóm dữ liệu theo từng địa chỉ IP và đếm tổng số lần xuất hiện của mã lỗi 401. Nếu số lượt lỗi của một IP cụ thể vượt qua ngưỡng cho trước, hệ thống ngay lập tức kích hoạt cảnh báo và tự động đưa IP đó vào danh sách chặn.
 
 % ---------------- CHƯƠNG III ----------------
 \chapter{ỨNG DỤNG VÀ TRIỂN KHAI BÀI TOÁN THỰC TẾ}

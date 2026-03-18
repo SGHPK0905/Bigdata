@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  18 MAR 2026 17:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  18 MAR 2026 18:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -770,7 +770,7 @@ Package hyperref Info: Link coloring ON on input line 27.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-<logo.png, id=178, 289.08pt x 290.0436pt>
+<logo.png, id=186, 289.08pt x 290.0436pt>
 File: logo.png Graphic file (type png)
 <use logo.png>
 Package pdftex.def Info: logo.png  used on input line 48.
@@ -803,54 +803,44 @@ l.82 \newpage
 Ch\uhorn \ohorn ng 1.
 [2
 
-] [3] [4]
+] [3] [4] [5]
 Ch\uhorn \ohorn ng 2.
-[5
+[6
 
-] [6] [7]
+] [7] [8]
 Ch\uhorn \ohorn ng 3.
-[8
+[9
 
 ]
 Ch\uhorn \ohorn ng 4.
-[9
-
-] [10
+[10
 
 ] [11
 
 ] [12
+
+] [13
 
 ] (report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
-
-
-Package rerunfilecheck Warning: File `report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `report.out':
-(rerunfilecheck)             Before: C643162E6C2A0D068BE43B0E2F13FC7D;10953
-(rerunfilecheck)             After:  F0FDD8FC745E8B29C4116F1B32326953;10970.
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: 73CA0A7EFD027B83E816EAF1BF41F679;11169.
  ) 
 Here is how much of TeX's memory you used:
- 21914 strings out of 467867
- 409130 string characters out of 5416882
+ 21916 strings out of 467867
+ 409159 string characters out of 5416882
  814511 words of memory out of 5000000
- 50403 multiletter control sequences out of 15000+600000
- 641386 words of font info for 61 fonts, out of 8000000 for 9000
+ 50404 multiletter control sequences out of 15000+600000
+ 640565 words of font info for 60 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,6n,104p,815b,614s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-pdfTeX warning (dest): name{section.1.4} has been referenced but does not exist, replaced by a fixed one
-
- <C:\Users\GIGABYTE\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb>
-Output written on report.pdf (16 pages, 316461 bytes).
+ <C:\Users\GIGABYTE\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb>
+Output written on report.pdf (17 pages, 316601 bytes).
 PDF statistics:
- 328 PDF objects out of 1000 (max. 8388607)
- 60 named destinations out of 1000 (max. 500000)
- 362 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 337 PDF objects out of 1000 (max. 8388607)
+ 62 named destinations out of 1000 (max. 500000)
+ 378 words of extra memory for PDF output out of 10000 (max. 10000000)
 
