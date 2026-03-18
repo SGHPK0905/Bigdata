@@ -8,17 +8,14 @@
 \usepackage{geometry}
 \usepackage{titlesec}
 \usepackage{tocloft}
-\usepackage{tikz} % Thư viện dùng để vẽ khung viền trang bìa
+\usepackage{tikz}
 \usetikzlibrary{calc}
 
 \geometry{a4paper, left=3cm, right=2cm, top=2cm, bottom=2cm}
-
-% Định dạng tiêu đề chương
 \titleformat{\chapter}[display]
   {\normalfont\huge\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
 \titlespacing*{\chapter}{0pt}{-50pt}{40pt}
 
-% Cấu hình hyperlink (Click vào mục lục nhảy đến trang)
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
@@ -29,17 +26,13 @@
 
 \begin{document}
 
-% ================= TRANG BÌA =================
 \begin{titlepage}
-    % Vẽ khung viền kép (đã mở rộng và tô màu xanh biển nhạt)
     \begin{tikzpicture}[remember picture, overlay]
-        % Viền ngoài đậm, màu xanh biển
         \draw[color=cyan!70!blue, line width = 2pt] 
             ($(current page.north west) + (2cm,-1.5cm)$) 
             rectangle 
             ($(current page.south east) + (-1.2cm,1.5cm)$);
-        
-        % Viền trong mảnh, màu xanh biển
+
         \draw[color=cyan!70!blue, line width = 0.5pt] 
             ($(current page.north west) + (2.1cm,-1.6cm)$) 
             rectangle 
@@ -52,7 +45,6 @@
         \textbf{\Large TRƯỜNG ĐẠI HỌC SÀI GÒN} \\[0.2cm]
         \textbf{\large KHOA TOÁN - ỨNG DỤNG} \\[1.5cm]
 
-        % Chèn Logo
         \includegraphics[width=4cm]{logo.png} \\[1.5cm]
 
         \textbf{\Large BÁO CÁO ĐỒ ÁN CUỐI KỲ} \\[0.5cm]
@@ -73,17 +65,15 @@
     \end{center}
 \end{titlepage}
 
-% ================= MỤC LỤC TỰ ĐỘNG =================
-\pagenumbering{roman} % Đánh số trang i, ii, iii cho phần mục lục
+\pagenumbering{roman}
 
-\tableofcontents % Lệnh tự động sinh Mục lục
+\tableofcontents
 \newpage
 
-\listoffigures % Lệnh tự động sinh Danh mục hình ảnh
+\listoffigures
 \newpage
 
-% ================= NỘI DUNG CHÍNH =================
-\pagenumbering{arabic} % Đánh số trang 1, 2, 3 cho nội dung
+\pagenumbering{arabic}
 
 \chapter*{LỜI MỞ ĐẦU}
 \addcontentsline{toc}{chapter}{LỜI MỞ ĐẦU}
