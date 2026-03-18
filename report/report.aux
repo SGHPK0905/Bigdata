@@ -43,12 +43,12 @@
 \citation{kafka_doc}
 \citation{confluent_bench}
 \citation{zaharia2013}
-\citation{spark_doc}
 \@writefile{toc}{\contentsline {section}{\numberline {2.2}Nền tảng phân phối sự kiện Apache Kafka}{8}{section.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}Kiến trúc kỹ thuật của Kafka}{8}{subsection.2.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Cơ chế phân vùng và nhóm tiêu thụ}{8}{subsection.2.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}Khung tính toán phân tán Apache Spark}{8}{section.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Cơ chế tính toán trực tiếp trên bộ nhớ}{8}{subsection.2.3.1}\protected@file@percent }
+\citation{spark_doc}
 \citation{chapple2021}
 \citation{anomaly_spark}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Xử lý luồng có cấu trúc và Khung thời gian}{9}{subsection.2.3.2}\protected@file@percent }
@@ -61,6 +61,7 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3.1}Phương pháp nghiên cứu và kiến trúc hệ thống}{10}{section.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Sơ đồ khối kiến trúc tổng thể}{10}{subsection.3.1.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Sơ đồ khối kiến trúc tổng thể của hệ thống}}{10}{figure.3.1}\protected@file@percent }
+\newlabel{fig:architecture}{{3.1}{10}{Sơ đồ khối kiến trúc tổng thể của hệ thống}{figure.3.1}{}}
 \citation{docker_doc}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Lựa chọn công nghệ triển khai ảo hóa}{11}{subsection.3.1.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Thu thập và giả lập dữ liệu}{11}{section.3.2}\protected@file@percent }
@@ -77,24 +78,32 @@
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{toc}{\contentsline {section}{\numberline {4.1}Khởi chạy hệ thống và tiếp nhận luồng dữ liệu}{15}{section.4.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Tiến trình sinh dữ liệu (trái) và tiến trình Spark ghi nhận lô nhỏ vào Hồ dữ liệu (phải)}}{15}{figure.4.1}\protected@file@percent }
+\newlabel{fig:cmd}{{4.1}{15}{Tiến trình sinh dữ liệu (trái) và tiến trình Spark ghi nhận lô nhỏ vào Hồ dữ liệu (phải)}{figure.4.1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4.2}Giám sát tổng quan tại Trung tâm Điều hành An ninh}{16}{section.4.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Các chỉ số an ninh trọng yếu tại Bảng điều khiển trung tâm}}{16}{figure.4.2}\protected@file@percent }
+\newlabel{fig:menudb}{{4.2}{16}{Các chỉ số an ninh trọng yếu tại Bảng điều khiển trung tâm}{figure.4.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces Bản đồ định vị các mối đe dọa và mức độ rủi ro hệ thống}}{16}{figure.4.3}\protected@file@percent }
+\newlabel{fig:mapdb}{{4.3}{16}{Bản đồ định vị các mối đe dọa và mức độ rủi ro hệ thống}{figure.4.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces Phân tích tương quan giữa lưu lượng đột biến và phân bổ mã trạng thái}}{17}{figure.4.4}\protected@file@percent }
+\newlabel{fig:statusdb}{{4.4}{17}{Phân tích tương quan giữa lưu lượng đột biến và phân bổ mã trạng thái}{figure.4.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4.3}Phân tích chuyên sâu các sự kiện an toàn thông tin}{17}{section.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Truy vết hành vi xâm nhập và dò quét lỗ hổng}{17}{subsection.4.3.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces Danh sách chi tiết các địa chỉ IP thực hiện hành vi xâm nhập trái phép}}{17}{figure.4.5}\protected@file@percent }
+\newlabel{fig:401404}{{4.5}{17}{Danh sách chi tiết các địa chỉ IP thực hiện hành vi xâm nhập trái phép}{figure.4.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Nhận diện công cụ thu thập dữ liệu tự động}{17}{subsection.4.3.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces Thống kê các đường dẫn hệ thống bị tin tặc nhắm mục tiêu nhiều nhất}}{18}{figure.4.6}\protected@file@percent }
+\newlabel{fig:link}{{4.6}{18}{Thống kê các đường dẫn hệ thống bị tin tặc nhắm mục tiêu nhiều nhất}{figure.4.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4.7}{\ignorespaces Danh sách công cụ thu thập tự động và đường dẫn bị khai thác}}{18}{figure.4.7}\protected@file@percent }
+\newlabel{fig:scratt}{{4.7}{18}{Danh sách công cụ thu thập tự động và đường dẫn bị khai thác}{figure.4.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4.4}Ứng dụng phân tích Trí tuệ Doanh nghiệp (BI)}{18}{section.4.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.5}Đánh giá hiệu năng và kiến trúc hệ thống}{18}{section.4.5}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4.8}{\ignorespaces Phân hệ phân tích kinh doanh minh họa biểu đồ phễu chuyển đổi}}{19}{figure.4.8}\protected@file@percent }
+\newlabel{fig:bidb}{{4.8}{19}{Phân hệ phân tích kinh doanh minh họa biểu đồ phễu chuyển đổi}{figure.4.8}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4.6}Đo lường các chỉ số hiệu năng hệ thống}{19}{section.4.6}\protected@file@percent }
 \citation{zaharia2013}
 \citation{confluent_bench}
 \@writefile{toc}{\contentsline {chapter}{KẾT LUẬN}{21}{chapter*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{LỜI CẢM ƠN}{22}{chapter*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{LỜI CẢM ƠN}{23}{chapter*.4}\protected@file@percent }
 \bibcite{spark_doc}{1}
 \bibcite{kafka_doc}{2}
 \bibcite{zaharia2013}{3}
@@ -105,5 +114,5 @@
 \bibcite{chapple2021}{8}
 \bibcite{owasp2021}{9}
 \bibcite{docker_doc}{10}
-\@writefile{toc}{\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{23}{chapter*.5}\protected@file@percent }
-\gdef \@abspage@last{27}
+\@writefile{toc}{\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{24}{chapter*.5}\protected@file@percent }
+\gdef \@abspage@last{29}

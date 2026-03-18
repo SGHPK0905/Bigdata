@@ -46,5 +46,5 @@
 \contentsline {section}{\numberline {4.5}Đánh giá hiệu năng và kiến trúc hệ thống}{18}{section.4.5}%
 \contentsline {section}{\numberline {4.6}Đo lường các chỉ số hiệu năng hệ thống}{19}{section.4.6}%
 \contentsline {chapter}{KẾT LUẬN}{21}{chapter*.3}%
-\contentsline {chapter}{LỜI CẢM ƠN}{22}{chapter*.4}%
-\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{23}{chapter*.5}%
+\contentsline {chapter}{LỜI CẢM ƠN}{23}{chapter*.4}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{24}{chapter*.5}%
