@@ -44,7 +44,7 @@ if list_of_files:
 
 df = st.session_state.last_valid_df
 
-st.markdown("<h3 style='color: #38bdf8;'>🛡️ TỔNG TÀI DOANH NGHIỆP: SIEM & BUSINESS INTELLIGENCE</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color: #38bdf8;'>🛡️ BẢNG ĐIỀU KHIỂN TRUNG TÂM: GIÁM SÁT AN NINH VÀ PHÂN TÍCH NGHIỆP VỤ</h3>", unsafe_allow_html=True)
 
 if not df.empty:
     brute_df = df[(df['status'] == 401)]
@@ -61,22 +61,22 @@ if not df.empty:
 
     total_bad_ips = len(pd.concat([brute_ips['ip'], scan_ips['ip'], scrape_ips['ip']]).unique())
 
-    tab_soc, tab_bi = st.tabs(["🚨 TRUNG TÂM SOC (AN NINH)", "📈 TRUNG TÂM BI (THUẦN KINH DOANH)"])
+    tab_soc, tab_bi = st.tabs(["🚨 TRUNG TÂM ĐIỀU HÀNH AN NINH (SOC)", "📈 TRUNG TÂM PHÂN TÍCH NGHIỆP VỤ (BI)"])
 
     with tab_soc:
         c1, c2, c3, c4 = st.columns(4)
-        c1.markdown(f'<div class="kpi-box"><div class="kpi-title">Tổng Requests</div><div class="kpi-value">{len(df)}</div></div>', unsafe_allow_html=True)
-        c2.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Lỗi 401 (Brute Force)</div><div class="kpi-value" style="color:#f87171;">{len(brute_ips)} IP</div></div>', unsafe_allow_html=True)
-        c3.markdown(f'<div class="kpi-box warn-text"><div class="kpi-title">Lỗi 404 (Scanner)</div><div class="kpi-value" style="color:#f59e0b;">{len(scan_ips)} IP</div></div>', unsafe_allow_html=True)
-        c4.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Tổng IP Sổ Đen</div><div class="kpi-value" style="color:#ef4444;">{total_bad_ips}</div></div>', unsafe_allow_html=True)
+        c1.markdown(f'<div class="kpi-box"><div class="kpi-title">Tổng Yêu Cầu Truy Cập</div><div class="kpi-value">{len(df)}</div></div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Cảnh Báo 401 (Brute Force)</div><div class="kpi-value" style="color:#f87171;">{len(brute_ips)} IP</div></div>', unsafe_allow_html=True)
+        c3.markdown(f'<div class="kpi-box warn-text"><div class="kpi-title">Cảnh Báo 404 (Scanner)</div><div class="kpi-value" style="color:#f59e0b;">{len(scan_ips)} IP</div></div>', unsafe_allow_html=True)
+        c4.markdown(f'<div class="kpi-box alert-text"><div class="kpi-title">Tổng IP Danh Sách Chặn</div><div class="kpi-value" style="color:#ef4444;">{total_bad_ips}</div></div>', unsafe_allow_html=True)
         
         st.write("")
-        soc_t1, soc_t2, soc_t3 = st.tabs(["🌍 TỔNG QUAN TÌNH HÌNH", "🔥 TẤN CÔNG XÂM NHẬP (401/404)", "🤖 BOT CÀO DỮ LIỆU (200)"])
+        soc_t1, soc_t2, soc_t3 = st.tabs(["🌍 TỔNG QUAN HỆ THỐNG", "🔥 GIÁM SÁT XÂM NHẬP (401/404)", "🤖 GIÁM SÁT THU THẬP DỮ LIỆU (200)"])
 
         with soc_t1:
             map_col, gauge_col = st.columns([2, 1])
             with map_col:
-                st.markdown("<h5 style='color: #e2e8f0;'>🗺️ BẢN ĐỒ CÁC MỐI ĐE DỌA</h5>", unsafe_allow_html=True)
+                st.markdown("<h5 style='color: #e2e8f0;'>🗺️ PHÂN BỔ ĐỊA LÝ NGUỒN TRUY CẬP ĐỘC HẠI</h5>", unsafe_allow_html=True)
                 bad_ip_list = pd.concat([brute_ips, scan_ips, scrape_ips]).drop_duplicates(subset=['ip'])
                 if not bad_ip_list.empty:
                     bad_ip_list['lat'], bad_ip_list['lon'] = zip(*bad_ip_list['ip'].apply(get_lat_lon))
@@ -84,10 +84,10 @@ if not df.empty:
                     fig_map.update_layout(uirevision='map', margin={"r":0,"t":0,"l":0,"b":0}, geo=dict(bgcolor='#0b1121', showland=True, landcolor='#1e293b', showocean=True, oceancolor='#0f172a', showcountries=True, countrycolor='#334155'), paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
                     st.plotly_chart(fig_map, width='stretch', key="map")
                 else: 
-                    st.info("Hệ thống an toàn.")
+                    st.info("Hệ thống hoạt động trong trạng thái an toàn.")
             
             with gauge_col:
-                st.markdown("<h5 style='color: #e2e8f0;'>⏱️ MỨC ĐỘ ĐE DỌA</h5>", unsafe_allow_html=True)
+                st.markdown("<h5 style='color: #e2e8f0;'>⏱️ CHỈ SỐ RỦI RO HỆ THỐNG</h5>", unsafe_allow_html=True)
                 max_gauge_val = max(150, total_bad_ips + 50) 
                 fig_gauge = go.Figure(go.Indicator(
                     mode="gauge+number", value=total_bad_ips, 
@@ -103,7 +103,7 @@ if not df.empty:
             chart_col1, chart_col2 = st.columns([2, 1])
             with chart_col1:
                 line_header, line_toggle = st.columns([2, 1])
-                line_header.markdown("<h5 style='color: #e2e8f0;'>📈 DIỄN BIẾN LƯU LƯỢNG (60s)</h5>", unsafe_allow_html=True)
+                line_header.markdown("<h5 style='color: #e2e8f0;'>📈 LƯU LƯỢNG TRUY CẬP THỜI GIAN THỰC (60s)</h5>", unsafe_allow_html=True)
                 freeze_chart = line_toggle.toggle("🔍 Khóa Line Chart", value=False)
                 
                 if 'time' in df.columns:
@@ -137,34 +137,38 @@ if not df.empty:
                     st.plotly_chart(fig_line, width='stretch', key="line", config={'scrollZoom': True, 'displayModeBar': True})
 
             with chart_col2:
-                st.markdown("<h5 style='color: #e2e8f0;'>🍩 MÃ TRẠNG THÁI HTTP</h5>", unsafe_allow_html=True)
+                st.markdown("<h5 style='color: #e2e8f0;'>🍩 PHÂN BỔ MÃ TRẠNG THÁI HTTP</h5>", unsafe_allow_html=True)
                 status_dist = df.groupby('status').size().reset_index(name='count')
                 status_dist['status'] = status_dist['status'].astype(str)
-                status_map = {'200': '200 (Hợp lệ)', '401': '401 (Sai Pass)', '404': '404 (Không thấy)', '500': '500 (Quá tải)'}
+                
+                # CHỈ SỬA TEXT Ở ĐÂY, KHÔNG SỬA LOGIC
+                status_map = {'200': '200 (Hợp lệ)', '401': '401 (Lỗi xác thực)', '404': '404 (Không tìm thấy)', '500': '500 (Lỗi máy chủ)'}
                 status_dist['Tên'] = status_dist['status'].map(status_map).fillna(status_dist['status'])
-                color_map = {'200 (Hợp lệ)': '#10b981', '401 (Sai Pass)': '#ef4444', '404 (Không thấy)': '#f59e0b', '500 (Quá tải)': '#f97316'}
+                
+                # CẬP NHẬT LẠI KEY CHO TRÙNG KHỚP
+                color_map = {'200 (Hợp lệ)': '#10b981', '401 (Lỗi xác thực)': '#ef4444', '404 (Không tìm thấy)': '#f59e0b', '500 (Lỗi máy chủ)': '#f97316'}
                 
                 fig_pie = px.pie(status_dist, values='count', names='Tên', color='Tên', color_discrete_map=color_map, hole=0.5, template="plotly_dark")
                 fig_pie.update_layout(uirevision='pie_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', margin={"t":10, "b":10}, legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
                 st.plotly_chart(fig_pie, width='stretch', key="pie")
 
         with soc_t2:
-            st.markdown("<h5 style='color: #e2e8f0;'>⚠️ DANH SÁCH KẺ TẤN CÔNG XÂM NHẬP HỆ THỐNG</h5>", unsafe_allow_html=True)
+            st.markdown("<h5 style='color: #e2e8f0;'>⚠️ DANH SÁCH ĐỊA CHỈ IP VI PHẠM BẢO MẬT</h5>", unsafe_allow_html=True)
             tbl1, tbl2 = st.columns(2)
             with tbl1:
                 if not brute_ips.empty:
-                    brute_display = brute_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Dò Pass', 'count':'Lần thử'})
+                    brute_display = brute_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'Địa Chỉ IP', 'count':'Số Lượt Vi Phạm'})
                     brute_display.index = range(1, len(brute_display) + 1)
                     st.dataframe(brute_display, width='stretch', height=250)
-                else: st.info("Không phát hiện Brute Force.")
+                else: st.info("Không phát hiện hành vi dò đoán mật khẩu.")
             with tbl2:
                 if not scan_ips.empty:
-                    scan_display = scan_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Quét Lỗi', 'count':'Lỗi 404'})
+                    scan_display = scan_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'Địa Chỉ IP', 'count':'Số Lượt Vi Phạm'})
                     scan_display.index = range(1, len(scan_display) + 1)
                     st.dataframe(scan_display, width='stretch', height=250)
-                else: st.info("Không phát hiện Rà quét lỗ hổng.")
+                else: st.info("Không phát hiện hành vi rà quét lỗ hổng.")
             
-            st.markdown("<h5 style='color: #e2e8f0; margin-top:20px;'>🎯 TOP ĐƯỜNG DẪN BỊ NHẮM TỚI (CỦA HACKER)</h5>", unsafe_allow_html=True)
+            st.markdown("<h5 style='color: #e2e8f0; margin-top:20px;'>🎯 THỐNG KÊ ĐƯỜNG DẪN BỊ TẤN CÔNG NHIỀU NHẤT</h5>", unsafe_allow_html=True)
             hacker_ips_list = pd.concat([brute_ips['ip'], scan_ips['ip']]).unique()
             hacker_target_df = df[df['ip'].isin(hacker_ips_list) & df['status'].isin([401, 404])]
             
@@ -177,19 +181,19 @@ if not df.empty:
                 st.success("Hệ thống an toàn. Chưa phát hiện mục tiêu bị tấn công.")
 
         with soc_t3:
-            st.markdown("<h5 style='color: #e2e8f0;'>🤖 DANH SÁCH BOT CÀO DỮ LIỆU ĐỐI THỦ</h5>", unsafe_allow_html=True)
+            st.markdown("<h5 style='color: #e2e8f0;'>🤖 DANH SÁCH IP THU THẬP DỮ LIỆU TỰ ĐỘNG</h5>", unsafe_allow_html=True)
             col_bot1, col_bot2 = st.columns([1, 2])
             with col_bot1:
                 if not scrape_ips.empty:
-                    scrape_display = scrape_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'IP Cào Data', 'count':'Trang bị copy'})
+                    scrape_display = scrape_ips.sort_values(by='count', ascending=False).head(100).rename(columns={'ip':'Địa Chỉ IP', 'count':'Số Lượt Truy Cập'})
                     scrape_display.index = range(1, len(scrape_display) + 1)
                     st.dataframe(scrape_display, width='stretch', height=250)
-                else: st.success("Không có dấu hiệu cào dữ liệu.")
+                else: st.success("Không có dấu hiệu thu thập dữ liệu bất thường.")
             with col_bot2:
                 if not scrape_ips.empty:
                     scrape_target_df = df[(df['ip'].isin(scrape_ips['ip'])) & (df['status'] == 200)]
                     scrape_url_dist = scrape_target_df.groupby('url').size().reset_index(name='count').sort_values(by='count')
-                    fig_bot_bar = px.bar(scrape_url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Oranges", template="plotly_dark", title="Các trang bị Bot thu thập nhiều nhất")
+                    fig_bot_bar = px.bar(scrape_url_dist, x='count', y='url', orientation='h', color='count', color_continuous_scale="Oranges", template="plotly_dark", title="Thống Kê Đường Dẫn Bị Thu Thập Dữ Liệu")
                     fig_bot_bar.update_layout(uirevision='bar_lock_bot', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121', coloraxis_showscale=False)
                     st.plotly_chart(fig_bot_bar, width='stretch', key="bar_bot")
 
@@ -198,23 +202,23 @@ if not df.empty:
         real_user_df = df[(df['status'] == 200) & (~df['ip'].isin(bad_ips_set))]
         
         b1, b2, b3, b4 = st.columns(4)
-        b1.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Khách hàng Xem SP</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/products"])}</div></div>', unsafe_allow_html=True)
-        b2.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Khách thêm Giỏ hàng</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/cart"])}</div></div>', unsafe_allow_html=True)
-        b3.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Khách chốt Đơn</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/checkout"])}</div></div>', unsafe_allow_html=True)
+        b1.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Lượt Xem Sản Phẩm</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/products"])}</div></div>', unsafe_allow_html=True)
+        b2.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Lượt Thêm Giỏ Hàng</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/cart"])}</div></div>', unsafe_allow_html=True)
+        b3.markdown(f'<div class="kpi-box success-text"><div class="kpi-title">Lượt Thanh Toán</div><div class="kpi-value" style="color:#10b981;">{len(real_user_df[real_user_df["url"]=="/checkout"])}</div></div>', unsafe_allow_html=True)
         
         visits = len(real_user_df[real_user_df["url"]=="/home"])
         sales = len(real_user_df[real_user_df["url"]=="/checkout"])
         conv_rate = round((sales/visits)*100, 2) if visits > 0 else 0
-        b4.markdown(f'<div class="kpi-box"><div class="kpi-title">Tỷ lệ Chuyển đổi (CVR)</div><div class="kpi-value">{conv_rate}%</div></div>', unsafe_allow_html=True)
+        b4.markdown(f'<div class="kpi-box"><div class="kpi-title">Tỷ Lệ Chuyển Đổi (CVR)</div><div class="kpi-value">{conv_rate}%</div></div>', unsafe_allow_html=True)
 
         st.write("")
         chart_bi1, chart_bi2 = st.columns([2, 1])
         
         with chart_bi1:
-            st.markdown("<h5 style='color: #e2e8f0;'>📉 PHỄU CHUYỂN ĐỔI (Đã lọc rác từ Bot)</h5>", unsafe_allow_html=True)
+            st.markdown("<h5 style='color: #e2e8f0;'>📉 PHỄU CHUYỂN ĐỔI HÀNH VI NGƯỜI DÙNG</h5>", unsafe_allow_html=True)
             funnel_urls = ['/home', '/products', '/cart', '/checkout']
             funnel_data = real_user_df[real_user_df['url'].isin(funnel_urls)].groupby('url').size().reindex(funnel_urls).reset_index(name='count')
-            funnel_data['url'] = ['Trang chủ', 'Xem Sản Phẩm', 'Vào Giỏ Hàng', 'Thanh Toán'] 
+            funnel_data['url'] = ['Trang Chủ', 'Xem Sản Phẩm', 'Vào Giỏ Hàng', 'Thanh Toán'] 
             
             fig_funnel = px.funnel(funnel_data, x='count', y='url', template="plotly_dark", color_discrete_sequence=['#10b981'])
             fig_funnel.update_layout(uirevision='funnel_lock', paper_bgcolor='#0b1121', plot_bgcolor='#0b1121')
