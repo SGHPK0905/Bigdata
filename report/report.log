@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  19 MAR 2026 03:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.14)  19 MAR 2026 03:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -802,7 +802,7 @@ Package hyperref Info: Link coloring ON on input line 29.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 \c@lstlisting=\count339
-<logo.png, id=206, 289.08pt x 290.0436pt>
+<logo.png, id=210, 289.08pt x 290.0436pt>
 File: logo.png Graphic file (type png)
 <use logo.png>
 Package pdftex.def Info: logo.png  used on input line 50.
@@ -847,7 +847,7 @@ Ch\uhorn \ohorn ng 2.
 
 ] [8] [9]
 Ch\uhorn \ohorn ng 3.
-<sodokientruc.png, id=369, 686.565pt x 208.52907pt>
+<sodokientruc.png, id=376, 686.565pt x 208.52907pt>
 File: sodokientruc.png Graphic file (type png)
 <use sodokientruc.png>
 Package pdftex.def Info: sodokientruc.png  used on input line 268.
@@ -862,100 +862,104 @@ File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 File: lstlang1.sty 2025/11/14 1.11b listings language file
 ) [12]
 LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 363.
- [13] [14]
+(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 364.
+ [13] (C:\Users\GIGABYTE\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstlang1.sty
+File: lstlang1.sty 2025/11/14 1.11b listings language file
+) (C:\Users\GIGABYTE\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstlang1.sty
+File: lstlang1.sty 2025/11/14 1.11b listings language file
+) [14]
 Ch\uhorn \ohorn ng 4.
-<cmd.png, id=420, 1444.64719pt x 776.14969pt>
+<cmd.png, id=439, 1444.64719pt x 776.14969pt>
 File: cmd.png Graphic file (type png)
 <use cmd.png>
-Package pdftex.def Info: cmd.png  used on input line 403.
+Package pdftex.def Info: cmd.png  used on input line 426.
 (pdftex.def)             Requested size: 409.71692pt x 220.11539pt.
 [15
 
  <./cmd.png>]
-<menudb.png, id=426, 1307.63531pt x 290.58563pt>
+<menudb.png, id=445, 1307.63531pt x 290.58563pt>
 File: menudb.png Graphic file (type png)
 <use menudb.png>
-Package pdftex.def Info: menudb.png  used on input line 413.
+Package pdftex.def Info: menudb.png  used on input line 436.
 (pdftex.def)             Requested size: 409.71692pt x 91.04721pt.
-<mapdb.png, id=428, 1310.64656pt x 542.77782pt>
+<mapdb.png, id=447, 1310.64656pt x 542.77782pt>
 File: mapdb.png Graphic file (type png)
 <use mapdb.png>
-Package pdftex.def Info: mapdb.png  used on input line 422.
+Package pdftex.def Info: mapdb.png  used on input line 445.
 (pdftex.def)             Requested size: 409.71692pt x 169.67561pt.
-<statusdb.png, id=431, 1303.87125pt x 515.67656pt>
+<statusdb.png, id=450, 1303.87125pt x 515.67656pt>
 File: statusdb.png Graphic file (type png)
 <use statusdb.png>
-Package pdftex.def Info: statusdb.png  used on input line 433.
+Package pdftex.def Info: statusdb.png  used on input line 456.
 (pdftex.def)             Requested size: 409.71692pt x 162.03767pt.
  [16 <./menudb.png> <./mapdb.png>]
-<401404.png, id=439, 1320.43312pt x 358.33875pt>
+<401404.png, id=458, 1320.43312pt x 358.33875pt>
 File: 401404.png Graphic file (type png)
 <use 401404.png>
-Package pdftex.def Info: 401404.png  used on input line 446.
+Package pdftex.def Info: 401404.png  used on input line 469.
 (pdftex.def)             Requested size: 409.71692pt x 111.18774pt.
-<link.png, id=441, 1276.01718pt x 439.6425pt>
+<link.png, id=460, 1276.01718pt x 439.6425pt>
 File: link.png Graphic file (type png)
 <use link.png>
-Package pdftex.def Info: link.png  used on input line 455.
+Package pdftex.def Info: link.png  used on input line 478.
 (pdftex.def)             Requested size: 409.71692pt x 141.16476pt.
  [17 <./statusdb.png> <./401404.png>]
-<scratt.png, id=449, 1303.11844pt x 517.18219pt>
+<scratt.png, id=468, 1303.11844pt x 517.18219pt>
 File: scratt.png Graphic file (type png)
 <use scratt.png>
-Package pdftex.def Info: scratt.png  used on input line 465.
+Package pdftex.def Info: scratt.png  used on input line 488.
 (pdftex.def)             Requested size: 409.71692pt x 162.60547pt.
-<bidb.png, id=451, 1315.91624pt x 614.295pt>
+<bidb.png, id=470, 1315.91624pt x 614.295pt>
 File: bidb.png Graphic file (type png)
 <use bidb.png>
-Package pdftex.def Info: bidb.png  used on input line 477.
+Package pdftex.def Info: bidb.png  used on input line 500.
 (pdftex.def)             Requested size: 409.71692pt x 191.2637pt.
  [18 <./link.png> <./scratt.png>] [19 <./bidb.png>] [20] [21
 
 ] [22] [23
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 547--548
+Underfull \hbox (badness 10000) in paragraph at lines 596--597
 []\T5/cmr/m/n/12 Apache Soft-ware Foun-da-tion. (2024). \T5/cmr/m/it/12 Struc-tured Stream-ing Pro-gram-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 547--548
+Underfull \hbox (badness 10000) in paragraph at lines 596--597
 \T5/cmr/m/it/12 ming Guide\T5/cmr/m/n/12 . Truy xu§t tø t i li»u ch½nh thùc cõa Apache Spark:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 547--548
+Underfull \hbox (badness 10000) in paragraph at lines 596--597
 \T5/cmr/m/n/12 https://spark.apache.org/docs/latest/structured-streaming-programming-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 556--557
+Underfull \hbox (badness 10000) in paragraph at lines 605--606
 []\T5/cmr/m/n/12 Munawar, A., & War-doyo, R. (2021). Real-Time Anomaly De-tec-
  []
 
 
-Underfull \hbox (badness 8151) in paragraph at lines 556--557
+Underfull \hbox (badness 8151) in paragraph at lines 605--606
 \T5/cmr/m/n/12 tion in Stream-ing Logs with Apache Spark. \T5/cmr/m/it/12 IEEE In-ter-na-tional Con-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 556--557
+Underfull \hbox (badness 10000) in paragraph at lines 605--606
 \T5/cmr/m/it/12 fer-ence on Ar-ti-fi-cial In-tel-li-gence and Com-puter Sci-ence Tech-nol-ogy\T5/cmr/m/n/12 .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 559--560
+Underfull \hbox (badness 10000) in paragraph at lines 608--609
 []\T5/cmr/m/n/12 Kreps, J. (2014). \T5/cmr/m/it/12 Bench-mark-ing Apache Kafka: 2 Mil-lion Writes Per
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 559--560
+Underfull \hbox (badness 10000) in paragraph at lines 608--609
 \T5/cmr/m/it/12 Sec-ond (On Three Cheap Ma-chines)\T5/cmr/m/n/12 . Con-flu-ent Blog. Truy xu§t tø:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 559--560
+Underfull \hbox (badness 10000) in paragraph at lines 608--609
 \T5/cmr/m/n/12 https://www.confluent.io/blog/benchmarking-apache-kafka-2-million-writes-per-
  []
 
@@ -967,20 +971,20 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 81DF15D06464E2E8460DE0C2992CCB60;13184.
+(rerunfilecheck)             Checksum: 24928BBCA9048D14DA5FD45C54F1D978;13494.
  ) 
 Here is how much of TeX's memory you used:
- 23902 strings out of 467867
- 436093 string characters out of 5416882
- 1176309 words of memory out of 5000000
- 52305 multiletter control sequences out of 15000+600000
+ 24009 strings out of 467867
+ 437513 string characters out of 5416882
+ 1177081 words of memory out of 5000000
+ 52394 multiletter control sequences out of 15000+600000
  642979 words of font info for 64 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,10n,104p,876b,2159s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\GIGABYTE\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on report.pdf (29 pages, 1074146 bytes).
+ <C:\Users\GIGABYTE\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/GIGABYTE/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
+Output written on report.pdf (29 pages, 1088970 bytes).
 PDF statistics:
- 541 PDF objects out of 1000 (max. 8388607)
- 122 named destinations out of 1000 (max. 500000)
- 463 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 568 PDF objects out of 1000 (max. 8388607)
+ 136 named destinations out of 1000 (max. 500000)
+ 471 words of extra memory for PDF output out of 10000 (max. 10000000)
 
