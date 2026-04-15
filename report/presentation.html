@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhà Máy Xử Lý Dữ Liệu Thời Gian Thực</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',    // slate-900
+                            card: '#1e293b',    // slate-800
+                            cyan: '#06b6d4',    // cyan-500
+                            cyanLight: '#22d3ee', // cyan-400
+                            orange: '#f97316',  // orange-500
+                            orangeLight: '#fb923c', // orange-400
+                            alert: '#ef4444',   // red-500
+                            success: '#10b981'  // emerald-500
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Animations for Slide 6 Chart */
+        .chart-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+        
+        .animate-draw {
+            animation: drawLine 2s ease-out forwards;
+        }
+
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .sliding-window {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            left: -15%;
+            background: rgba(6, 182, 212, 0.2);
+            border-left: 2px solid #06b6d4;
+            border-right: 2px solid #06b6d4;
+            opacity: 0;
+        }
+
+        .animate-slide {
+            animation: slideAcross 4s ease-in-out forwards;
+        }
+
+        @keyframes slideAcross {
+            0% { left: -15%; opacity: 1; background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; }
+            40% { left: 42.5%; opacity: 1; background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; box-shadow: none; }
+            45% { left: 42.5%; opacity: 1; background: rgba(249, 115, 22, 0.3); border-color: #f97316; box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
+            60% { left: 42.5%; opacity: 1; background: rgba(249, 115, 22, 0.3); border-color: #f97316; box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
+            65% { left: 45%; opacity: 1; background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; box-shadow: none; }
+            100% { left: 100%; opacity: 1; background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; }
+        }
+
+        .pulse-alert {
+            animation: pulseRed 1s infinite;
+        }
+
+        @keyframes pulseRed {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Fade in Scroll utilities */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, visibility;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Utility Component for Scroll Reveal ---
+        const FadeInSection = ({ children, delay = 0, className = "" }) => {
+            const [isVisible, setVisible] = useState(false);
+            const domRef = useRef();
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => setVisible(true), delay);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                if (domRef.current) observer.observe(domRef.current);
+                return () => {
+                    if (domRef.current) observer.unobserve(domRef.current);
+                };
+            }, [delay]);
+
+            return (
+                <div ref={domRef} className={`fade-in-section ${isVisible ? 'is-visible' : ''} ${className}`}>
+                    {children}
+                </div>
+            );
+        };
+
+        // --- Sections ---
+
+        const HeroSection = () => (
+            <section className="min-h-screen flex flex-col justify-center relative overflow-hidden px-6 lg:px-20 py-20 bg-gradient-to-b from-slate-900 to-brand-dark">
+                <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #06b6d4 0%, transparent 50%)' }}></div>
+                <FadeInSection>
+                    <div className="max-w-5xl mx-auto z-10 relative">
+                        <div className="inline-block px-4 py-1.5 rounded-full border border-brand-cyan text-brand-cyanLight text-sm font-mono mb-6">
+                            Đồ án Cuối kỳ - Ngành Toán Ứng dụng
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white">
+                            Nhà Máy Xử Lý <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-cyanLight to-brand-orangeLight">
+                                Dữ Liệu Thời Gian Thực
+                            </span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-slate-400 mb-10 max-w-3xl">
+                            Xây dựng Hệ thống SOC & Phân tích Dữ liệu lớn với Apache Kafka và Spark. Biến luồng dữ liệu khổng lồ thành thông tin bảo mật và giá trị doanh nghiệp tức thời.
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-6 text-sm text-slate-400 font-mono bg-slate-800/50 p-6 rounded-xl border border-slate-700/50 backdrop-blur-sm inline-block">
+                            <p><strong className="text-slate-200">Học phần:</strong> Xử lý dữ liệu lớn (Big Data)</p>
+                            <p><strong className="text-slate-200">Sinh viên:</strong> Nguyễn Trương Cao Sơn (DDU1231)</p>
+                            <p><strong className="text-slate-200">GVHD:</strong> Vũ Ngọc Thanh Sang</p>
+                            <p><strong className="text-slate-200">Năm:</strong> 2026</p>
+                        </div>
+                    </div>
+                </FadeInSection>
+            </section>
+        );
+
+        const TheorySection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-brand-dark border-t border-slate-800">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Cơ sở lý thuyết: <span className="text-brand-cyanLight">Big Data 5V & Công nghệ lõi</span></h2>
+                    </FadeInSection>
+                    
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <FadeInSection delay={100} className="glass-panel p-8 rounded-2xl relative">
+                            <h3 className="text-xl font-bold mb-4 text-center text-slate-200">Mô hình Big Data 5V</h3>
+                            <div className="relative w-[280px] h-[280px] mx-auto mt-8 mb-4">
+                                {/* Vòng tròn mũi tên kết nối SVG */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 280 280">
+                                    <defs>
+                                        <marker id="arrow-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4" />
+                                        </marker>
+                                    </defs>
+                                    <path d="M 181 38 A 110 110 0 0 1 224 70" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 249 147 A 110 110 0 0 1 233 198" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 166 246 A 110 110 0 0 1 114 246" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 47 198 A 110 110 0 0 1 31 147" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 56 70 A 110 110 0 0 1 99 38" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                </svg>
+
+                                {/* Các node 5V */}
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '30px', left: '140px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Volume</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Khối lượng lớn</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '245px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Variety</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Đa dạng</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '205px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Value</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Giá trị</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '75px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Veracity</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Độ tin cậy</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '35px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Velocity</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Tốc độ</span>
+                                </div>
+                            </div>
+                        </FadeInSection>
+
+                        <div className="space-y-8">
+                            <FadeInSection delay={200} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-cyan">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-2xl font-bold">Apache Kafka</h3>
+                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Trạm đệm</span>
+                                </div>
+                                <ul className="space-y-3 text-slate-300">
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Xử lý luồng dữ liệu phân tán</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Thông lượng cao, độ trễ thấp</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Khả năng mở rộng linh hoạt</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Bền bỉ, chịu lỗi tốt</li>
+                                </ul>
+                            </FadeInSection>
+
+                            <FadeInSection delay={300} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-orange">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-2xl font-bold">Apache Spark</h3>
+                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Lõi xử lý</span>
+                                </div>
+                                <ul className="space-y-3 text-slate-300">
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Tính toán trên bộ nhớ (In-Memory)</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý dữ liệu lớn nhanh chóng</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Thư viện đa dạng (SQL, MLlib)</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý theo luồng (Micro-batching)</li>
+                                </ul>
+                            </FadeInSection>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const GoalsSection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-slate-900">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Khởi nguồn ý tưởng & <span className="text-brand-cyanLight">Mục tiêu cốt lõi</span></h2>
+                    </FadeInSection>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            { step: "01", title: "Khả năng chịu tải (Throughput)", desc: "Làm sao để tiếp nhận >9,000 requests/phút mà không mất mát dữ liệu?", color: "cyan" },
+                            { step: "02", title: "Độ trễ phân tích (Latency)", desc: "Có thể rút ngắn thời gian phát hiện từ hàng giờ xuống chỉ còn vài giây?", color: "cyan" },
+                            { step: "03", title: "Ngưỡng phát hiện (Thresholding)", desc: "Cơ chế nào để phân biệt chính xác đợt tấn công Brute Force với lỗi người dùng thông thường?", color: "orange" }
+                        ].map((goal, i) => (
+                            <FadeInSection key={i} delay={i * 150} className="glass-panel p-8 rounded-2xl relative overflow-hidden group hover:border-brand-cyan transition-colors">
+                                <div className={`text-6xl font-black text-slate-800 absolute -top-4 -right-2 group-hover:text-slate-700 transition-colors`}>{goal.step}</div>
+                                <h3 className={`text-xl font-bold mb-4 text-brand-${goal.color}Light relative z-10`}>{goal.title}</h3>
+                                <p className="text-slate-400 relative z-10">{goal.desc}</p>
+                            </FadeInSection>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const ArchitectureSection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-brand-dark">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-8">Kiến trúc Tách rời <span className="text-brand-cyanLight">(Decoupled Pipeline)</span></h2>
+                        <p className="text-slate-400 mb-12 max-w-4xl text-lg">
+                            Trạm trung chuyển Apache Kafka đóng vai trò như "Hồ chứa" (Reservoir) hấp thụ toàn bộ lưu lượng thô. Cụm Spark hoạt động hoàn toàn độc lập phía sau để kéo dữ liệu về xử lý mà không làm ảnh hưởng đến máy chủ web gốc.
+                        </p>
+                    </FadeInSection>
+                    
+                    <FadeInSection delay={200}>
+                        <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 flex justify-center overflow-hidden">
+                            <img src="sodokientruc.png" alt="Sơ đồ khối kiến trúc" className="max-w-full h-auto rounded invert brightness-90 hue-rotate-180" style={{mixBlendMode: 'screen'}} onError={(e) => {
+                                // Fallback mock if image not found
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                            }}/>
+                            {/* Fallback Architecture UI if image fails to load */}
+                            <div className="hidden w-full flex-col md:flex-row items-center justify-between gap-4 py-10 px-4">
+                                <div className="glass-panel p-6 rounded-xl text-center border-slate-600">Giả lập Dữ liệu<br/><span className="text-xs text-slate-400">Python Script</span></div>
+                                <i data-lucide="arrow-right" className="text-brand-cyan"></i>
+                                <div className="glass-panel p-6 rounded-xl text-center border-brand-cyan bg-brand-cyan/10">Trạm Kafka<br/><span className="text-xs text-brand-cyanLight">Reservoir</span></div>
+                                <i data-lucide="arrow-right" className="text-brand-cyan"></i>
+                                <div className="glass-panel p-6 rounded-xl text-center border-brand-orange bg-brand-orange/10">Cụm Spark<br/><span className="text-xs text-brand-orangeLight">RAM Generator</span></div>
+                                <i data-lucide="arrow-right" className="text-brand-cyan"></i>
+                                <div className="flex flex-col gap-4">
+                                    <div className="glass-panel p-4 rounded-xl text-center border-red-500/50 text-sm">Cảnh báo / Block IP</div>
+                                    <div className="glass-panel p-4 rounded-xl text-center border-green-500/50 text-sm">Bảng điều khiển BI</div>
+                                </div>
+                            </div>
+                        </div>
+                    </FadeInSection>
+                </div>
+            </section>
+        );
+
+        // --- SLIDE 6: THE COMPLEX ANIMATION ---
+        const AlgorithmAnimationSection = () => {
+            const [animState, setAnimState] = useState(0); // 0: init, 1: chart drawn, 2: window sliding, 3: spike hit
+            const sectionRef = useRef();
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting && animState === 0) {
+                        
+                        // Đã thêm Timeout 1 giây (1000ms) để người dùng kịp dừng cuộn và nhìn
+                        setTimeout(() => {
+                            setAnimState(1); // Vẽ biểu đồ
+                            
+                            setTimeout(() => {
+                                setAnimState(2); // Bắt đầu trượt cửa sổ
+                                
+                                setTimeout(() => {
+                                    setAnimState(3); // Cửa sổ chạm ngưỡng cảnh báo
+                                    
+                                    setTimeout(() => {
+                                        setAnimState(4); // Cửa sổ trượt hết
+                                    }, 1800);
+                                }, 2000);
+                            }, 2000);
+                        }, 1000); // <-- Delay khởi động animation
+                        
+                        observer.unobserve(sectionRef.current);
+                    }
+                }, { threshold: 0.6 }); // <-- Tăng threshold lên 0.6: Phải thấy được 60% chiều cao section mới kích hoạt
+
+                if (sectionRef.current) observer.observe(sectionRef.current);
+                return () => observer.disconnect();
+            }, [animState]);
+
+            return (
+                <section ref={sectionRef} className="py-24 px-6 lg:px-20 bg-slate-900 border-y border-slate-800">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">Thuật toán Nhận diện:</h2>
+                            <h3 className="text-2xl md:text-3xl text-brand-orangeLight font-light">Cửa sổ Thời gian & Ngưỡng lỗi</h3>
+                        </div>
+
+                        {/* Chart Container */}
+                        <div className="relative w-full h-64 md:h-80 bg-slate-800/30 border-l border-b border-slate-600 mb-12 overflow-hidden rounded-tr-xl">
+                            {/* Y Axis Label */}
+                            <div className="absolute -left-6 top-1/2 -rotate-90 origin-center text-xs text-slate-400 whitespace-nowrap hidden md:block">Lưu lượng truy cập (Traffic Volume)</div>
+                            
+                            {/* X Axis Label */}
+                            <div className="absolute bottom-2 right-4 text-xs text-slate-400">Thời gian (Time)</div>
+
+                            {/* Threshold Line */}
+                            <div className={`absolute left-0 w-full border-t-2 border-dashed border-brand-orangeLight transition-all duration-1000 ${animState >= 1 ? 'top-[40%] opacity-100' : 'top-full opacity-0'}`}>
+                                <span className="absolute right-4 -top-6 text-xs text-brand-orangeLight">Ngưỡng giới hạn (Threshold)</span>
+                            </div>
+
+                            {/* Sliding Window */}
+                            <div className={`sliding-window ${animState >= 2 ? 'animate-slide' : ''}`}></div>
+
+                            {/* SVG Chart Line */}
+                            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                                <path 
+                                    className={`chart-path ${animState >= 1 ? 'animate-draw' : ''}`}
+                                    d="M 0 80 Q 50 85 100 70 T 200 75 T 300 80 T 400 65 L 450 60 L 500 10 L 550 55 T 600 75 T 700 80 T 800 70 T 900 85 T 1000 80" 
+                                    fill="none" 
+                                    stroke="#fff" 
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                                {/* Glow under spike when hit */}
+                                <path 
+                                    className={`transition-opacity duration-300 ${animState === 3 ? 'opacity-50' : 'opacity-0'}`}
+                                    d="M 450 100 L 450 60 L 500 10 L 550 55 L 550 100 Z" 
+                                    fill="url(#orange-glow)" 
+                                />
+                                <defs>
+                                    <linearGradient id="orange-glow" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#f97316" stopOpacity="0.8"/>
+                                        <stop offset="100%" stopColor="#f97316" stopOpacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+
+                        {/* 3 Steps Below */}
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {/* Box 1 */}
+                            <div className={`glass-panel p-6 rounded-xl border-t-4 transition-all duration-500 transform ${animState >= 2 ? 'border-t-brand-cyan translate-y-0 opacity-100' : 'border-t-transparent translate-y-4 opacity-30'}`}>
+                                <h4 className="font-bold text-lg mb-2 text-white">1. Khung thời gian (Sliding Window)</h4>
+                                <p className="text-sm text-slate-400">Cắt thời gian thực thành các đoạn ngắn (VD: 1 phút) để giám sát cục bộ.</p>
+                            </div>
+
+                            {/* Box 2 */}
+                            <div className={`glass-panel p-6 rounded-xl border-t-4 transition-all duration-500 transform ${animState >= 3 ? 'border-t-brand-cyan translate-y-0 opacity-100' : 'border-t-transparent translate-y-4 opacity-30'}`}>
+                                <h4 className="font-bold text-lg mb-2 text-white">2. Gom nhóm (Aggregation)</h4>
+                                <p className="text-sm text-slate-400">Nhóm toàn bộ nhật ký theo từng Địa chỉ IP nguồn.</p>
+                            </div>
+
+                            {/* Box 3 */}
+                            <div className={`glass-panel p-6 rounded-xl border-t-4 transition-all duration-500 transform relative ${animState >= 3 ? 'border-t-brand-orange pulse-alert translate-y-0 opacity-100' : 'border-t-transparent translate-y-4 opacity-30'}`}>
+                                <h4 className="font-bold text-lg mb-2 text-white">3. Đối sánh luật (Rule Matching)</h4>
+                                <p className="text-sm text-slate-400 mb-4">Đếm tổng số mã lỗi HTTP 401 (Brute Force) hoặc 404 (Scanning).</p>
+                                
+                                <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-[110%] bg-brand-orange text-black font-bold py-2 px-4 rounded shadow-lg text-center text-sm transition-all duration-300 ${animState >= 3 ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
+                                    Trượt qua ranh giới ngưỡng &gt; Kích hoạt cô lập IP tức thời.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const TerminalSection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-brand-dark">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl font-bold mb-10">Trạm 3: Spark ETL & <span className="text-brand-cyanLight">Cơ chế Chia lô nhỏ (Micro-batching)</span></h2>
+                    </FadeInSection>
+                    <div className="grid md:grid-cols-12 gap-8 items-center">
+                        <div className="md:col-span-4 space-y-6">
+                            <FadeInSection delay={100} className="bg-slate-800/80 p-6 rounded-xl border border-slate-700">
+                                <h3 className="text-xl font-bold text-white mb-2">Bóc tách Lược đồ</h3>
+                                <p className="text-slate-400 text-sm">Spark bóc tách lược đồ JSON thô &gt; Gom thành Khung dữ liệu (DataFrame) có cấu trúc.</p>
+                            </FadeInSection>
+                            <FadeInSection delay={200} className="bg-slate-800/80 p-6 rounded-xl border border-slate-700 relative overflow-hidden">
+                                <div className="absolute right-[-20px] top-[-20px] opacity-10"><i data-lucide="clock" className="w-32 h-32 text-brand-cyan"></i></div>
+                                <h3 className="text-xl font-bold text-brand-cyanLight mb-2 relative z-10">Trigger 3 Giây</h3>
+                                <p className="text-slate-300 text-sm relative z-10">Thay vì ghi từng dòng, hệ thống sử dụng Trigger gom toàn bộ sự kiện mỗi 3 giây thành một Lô (Batch) đẩy xuống Data Lake. Cân bằng hoàn hảo giữa Tốc độ và Tài nguyên.</p>
+                            </FadeInSection>
+                        </div>
+                        <div className="md:col-span-8">
+                            <FadeInSection delay={300}>
+                                <div className="rounded-xl overflow-hidden border border-slate-700 shadow-2xl">
+                                    <div className="bg-slate-800 px-4 py-2 flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                        <span className="ml-4 text-xs font-mono text-slate-400">spark-shell --master local[*]</span>
+                                    </div>
+                                    <div className="bg-[#0c0c0c] p-1">
+                                        <img src="cmd.jpg" alt="Spark Terminal Output" className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity" onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'block';
+                                        }}/>
+                                        {/* Mock terminal text if image fails */}
+                                        <div className="hidden p-4 font-mono text-[10px] sm:text-xs text-green-400 h-64 overflow-y-auto">
+                                            [319] Đã ghi thêm dữ liệu mới vào Data Lake...<br/>
+                                            [320] Đã ghi thêm dữ liệu mới vào Data Lake...<br/>
+                                            [321] Đã ghi thêm dữ liệu mới vào Data Lake...<br/>
+                                            <span className="text-slate-400">115.48.199.180 - 404 - /wp-login.php</span><br/>
+                                            <span className="text-slate-400">115.48.199.180 - 404 - /.env</span><br/>
+                                            [322] Đã ghi thêm dữ liệu mới vào Data Lake...<br/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const DashboardGallerySection = () => {
+            const [activeTab, setActiveTab] = useState('soc');
+
+            // Helper components for the SOC UI
+            const SocIPRow = ({ rank, ip, count }) => (
+                <div className="flex justify-between items-center py-2 px-4 border-b border-slate-700/50 hover:bg-slate-700/30">
+                    <div className="flex gap-4">
+                        <span className="text-slate-500 w-4">{rank}</span>
+                        <span className="text-slate-300 font-mono">{ip}</span>
+                    </div>
+                    <span className="text-slate-300">{count}</span>
+                </div>
+            );
+
+            const SocBarChartRow = ({ url, widthClass, colorClass }) => (
+                <div className="flex items-center gap-4 py-2">
+                    <div className="w-24 text-right text-sm text-slate-300 font-mono shrink-0">{url}</div>
+                    <div className={`h-8 ${widthClass} ${colorClass} rounded-r-sm`}></div>
+                </div>
+            );
+
+            return (
+                <section className="py-20 px-6 lg:px-20 bg-slate-900 min-h-screen">
+                    <div className="max-w-7xl mx-auto">
+                        <FadeInSection>
+                            <div className="text-center mb-12">
+                                <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">Kết quả Thực nghiệm</h2>
+                                <p className="text-brand-cyanLight text-lg">Hệ thống Dashboard Hoạt động Thực tế</p>
+                            </div>
+                        </FadeInSection>
+
+                        {/* Tab Headers */}
+                        <FadeInSection delay={100}>
+                            <div className="flex justify-center gap-4 mb-8">
+                                <button 
+                                    onClick={() => setActiveTab('soc')}
+                                    className={`px-6 py-3 rounded-t-xl font-bold transition-all border-b-2 ${activeTab === 'soc' ? 'bg-slate-800 text-brand-cyanLight border-brand-cyanLight' : 'bg-slate-900 text-slate-500 border-transparent hover:text-slate-300 hover:bg-slate-800/50'}`}>
+                                    Trung tâm Điều hành An ninh (SOC)
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('bi')}
+                                    className={`px-6 py-3 rounded-t-xl font-bold transition-all border-b-2 ${activeTab === 'bi' ? 'bg-slate-800 text-brand-success border-brand-success' : 'bg-slate-900 text-slate-500 border-transparent hover:text-slate-300 hover:bg-slate-800/50'}`}>
+                                    Phân tích Nghiệp vụ (BI)
+                                </button>
+                            </div>
+                        </FadeInSection>
+
+                        {/* Tab Content */}
+                        <div className="bg-[#121a2f] p-4 md:p-8 rounded-2xl border border-slate-700/50 shadow-2xl min-h-[600px]">
+                            {activeTab === 'soc' && (
+                                <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
+                                    
+                                    {/* Top KPI Cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-t-4 border-cyan-500 text-center shadow-md">
+                                            <div className="text-sm text-slate-400 mb-2">Tổng Lượt Yêu Cầu</div>
+                                            <div className="text-3xl font-bold text-cyan-500">9120</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-t-4 border-red-500 text-center shadow-md">
+                                            <div className="text-sm text-slate-400 mb-2">Cảnh Báo Lỗi 401</div>
+                                            <div className="text-3xl font-bold text-red-500">9 IP</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-t-4 border-yellow-500 text-center shadow-md">
+                                            <div className="text-sm text-slate-400 mb-2">Cảnh Báo Lỗi 404</div>
+                                            <div className="text-3xl font-bold text-yellow-500">5 IP</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-t-4 border-red-600 text-center shadow-md">
+                                            <div className="text-sm text-slate-400 mb-2">Tổng IP Danh Sách Chặn</div>
+                                            <div className="text-3xl font-bold text-red-600">21</div>
+                                        </div>
+                                    </div>
+
+                                    {/* IP Violation List */}
+                                    <div className="bg-[#1a233a] rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                                        <div className="p-4 border-b border-slate-700 font-bold text-yellow-500 flex items-center gap-2">
+                                            <i data-lucide="alert-triangle" className="w-5 h-5"></i> DANH SÁCH ĐỊA CHỈ IP VI PHẠM BẢO MẬT
+                                        </div>
+                                        <div className="grid md:grid-cols-2 gap-px bg-slate-700">
+                                            {/* Table Left */}
+                                            <div className="bg-[#1a233a]">
+                                                <div className="flex justify-between items-center py-2 px-4 border-b border-slate-700 text-sm text-slate-400">
+                                                    <span>Địa Chỉ IP</span><span>Số Lượt Vi Phạm</span>
+                                                </div>
+                                                <SocIPRow rank="1" ip="141.180.155.247" count="290" />
+                                                <SocIPRow rank="2" ip="29.69.163.226" count="286" />
+                                                <SocIPRow rank="3" ip="76.209.20.221" count="260" />
+                                                <SocIPRow rank="4" ip="5.247.75.218" count="253" />
+                                                <SocIPRow rank="5" ip="90.3.128.178" count="252" />
+                                                <SocIPRow rank="6" ip="113.127.120.5" count="247" />
+                                            </div>
+                                            {/* Table Right */}
+                                            <div className="bg-[#1a233a]">
+                                                <div className="flex justify-between items-center py-2 px-4 border-b border-slate-700 text-sm text-slate-400">
+                                                    <span>Địa Chỉ IP</span><span>Số Lượt Vi Phạm</span>
+                                                </div>
+                                                <SocIPRow rank="1" ip="180.189.142.218" count="322" />
+                                                <SocIPRow rank="2" ip="240.202.30.214" count="295" />
+                                                <SocIPRow rank="3" ip="76.117.55.57" count="286" />
+                                                <SocIPRow rank="4" ip="126.76.246.124" count="282" />
+                                                <SocIPRow rank="5" ip="115.48.199.180" count="254" />
+                                                <SocIPRow rank="6" ip="142.91.117.56" count="213" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Risk Row (Map removed) */}
+                                    <div className="grid grid-cols-1">
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border border-slate-700 shadow-lg flex flex-col items-center">
+                                            <h3 className="w-full text-sm font-bold text-white mb-6 flex items-center gap-2 uppercase">
+                                                <i data-lucide="activity" className="w-5 h-5 text-purple-400"></i> Chỉ Số Rủi Ro Hệ Thống
+                                            </h3>
+                                            <div className="relative w-full max-w-[200px] mt-4">
+                                                <svg viewBox="0 0 100 55" className="w-full">
+                                                    {/* Background Arc */}
+                                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#334155" strokeWidth="15" />
+                                                    {/* Green Arc (0-30) */}
+                                                    <path d="M 10 50 A 40 40 0 0 1 20 23" fill="none" stroke="#10b981" strokeWidth="15" />
+                                                    {/* Orange Arc (30-70) */}
+                                                    <path d="M 20 23 A 40 40 0 0 1 80 23" fill="none" stroke="#f97316" strokeWidth="15" />
+                                                    {/* Red Arc (70-100) */}
+                                                    <path d="M 80 23 A 40 40 0 0 1 90 50" fill="none" stroke="#b91c1c" strokeWidth="15" />
+                                                </svg>
+                                                <div className="absolute top-[55%] left-1/2 -translate-x-1/2 text-4xl font-bold text-white">21</div>
+                                                <div className="absolute bottom-0 left-1 text-xs text-slate-400">0</div>
+                                                <div className="absolute bottom-0 right-1 text-xs text-slate-400">100</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Links Attacked Bar Chart */}
+                                    <div className="bg-[#1a233a] p-6 rounded-lg border border-slate-700 shadow-lg">
+                                        <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2 uppercase">
+                                            <i data-lucide="target" className="w-5 h-5 text-red-500"></i> THỐNG KÊ ĐƯỜNG DẪN BỊ TẤN CÔNG NHIỀU NHẤT
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <SocBarChartRow url="/login" widthClass="w-[95%]" colorClass="bg-[#7c1016]" />
+                                            <SocBarChartRow url="/wp-login.php" widthClass="w-[20%]" colorClass="bg-[#fff0e6]" />
+                                            <SocBarChartRow url="/.env" widthClass="w-[19%]" colorClass="bg-[#fff0e6]" />
+                                            <SocBarChartRow url="/config.php" widthClass="w-[18%]" colorClass="bg-[#fff0e6]" />
+                                            <SocBarChartRow url="/backup.zip" widthClass="w-[18%]" colorClass="bg-[#fff0e6]" />
+                                            <SocBarChartRow url="/admin" widthClass="w-[18%]" colorClass="bg-[#fff0e6]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'bi' && (
+                                <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
+                                    {/* Top KPI Cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-l-4 border-brand-success shadow-lg">
+                                            <div className="text-sm text-slate-400 mb-1">Lượt Xem Sản Phẩm</div>
+                                            <div className="text-2xl font-bold text-brand-success">1077</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-l-4 border-brand-success shadow-lg">
+                                            <div className="text-sm text-slate-400 mb-1">Lượt Thêm Giỏ Hàng</div>
+                                            <div className="text-2xl font-bold text-brand-success">398</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-l-4 border-brand-success shadow-lg">
+                                            <div className="text-sm text-slate-400 mb-1">Lượt Thanh Toán</div>
+                                            <div className="text-2xl font-bold text-brand-success">157</div>
+                                        </div>
+                                        <div className="bg-[#1a233a] p-4 rounded-lg border-l-4 border-brand-cyan shadow-lg">
+                                            <div className="text-sm text-slate-400 mb-1">Tỷ Lệ Chuyển Đổi (CVR)</div>
+                                            <div className="text-2xl font-bold text-brand-cyan">10.38%</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Charts Row */}
+                                    <div className="grid lg:grid-cols-2 gap-6">
+                                        {/* Funnel Chart */}
+                                        <div className="bg-[#1a233a] p-6 rounded-lg border border-slate-700 shadow-lg">
+                                            <h3 className="text-sm md:text-base font-bold text-white mb-6 flex items-center gap-2 uppercase">
+                                                <i data-lucide="bar-chart-2" className="w-5 h-5 text-brand-cyan"></i> 
+                                                Phễu chuyển đổi hành vi người dùng
+                                            </h3>
+                                            <div className="flex gap-4 items-center">
+                                                <div className="flex flex-col justify-between h-[240px] py-6 text-xs md:text-sm text-slate-300 font-medium whitespace-nowrap">
+                                                    <div>Trang Chủ</div>
+                                                    <div>Xem Sản Phẩm</div>
+                                                    <div>Vào Giỏ Hàng</div>
+                                                    <div>Thanh Toán</div>
+                                                </div>
+                                                <div className="flex-1 w-full">
+                                                    <svg width="100%" height="240" viewBox="0 0 500 240" preserveAspectRatio="none">
+                                                        <polygon points="0,0 500,0 428,57 72,57" fill="#10b981" />
+                                                        <text x="250" y="33" fill="#0f172a" fontSize="14" fontWeight="bold" textAnchor="middle">1513</text>
+                                                        <polygon points="72,61 428,61 315.5,118 184.5,118" fill="#10b981" />
+                                                        <text x="250" y="94" fill="#0f172a" fontSize="14" fontWeight="bold" textAnchor="middle">1077</text>
+                                                        <polygon points="184.5,122 315.5,122 276,179 224,179" fill="#10b981" />
+                                                        <text x="250" y="155" fill="#0f172a" fontSize="14" fontWeight="bold" textAnchor="middle">398</text>
+                                                        <polygon points="224,183 276,183 276,240 224,240" fill="#10b981" />
+                                                        <text x="250" y="216" fill="#0f172a" fontSize="14" fontWeight="bold" textAnchor="middle">157</text>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Donut Chart */}
+                                        <div className="bg-[#1a233a] p-6 rounded-lg border border-slate-700 shadow-lg">
+                                            <h3 className="text-sm md:text-base font-bold text-white mb-6 flex items-center gap-2 uppercase">
+                                                <i data-lucide="pie-chart" className="w-5 h-5 text-brand-orangeLight"></i> 
+                                                Tỷ lệ truy cập các trang
+                                            </h3>
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
+                                                <div className="relative w-48 h-48 rounded-full" style={{ background: 'conic-gradient(#b0ebd3 0% 40.8%, #7dd3bc 40.8% 69.8%, #4abda5 69.8% 80.5%, #38988e 80.5% 90.9%, #24726e 90.9% 95.78%, #124c49 95.78% 100%)' }}>
+                                                    <div className="absolute inset-0 m-auto w-24 h-24 bg-[#1a233a] rounded-full"></div>
+                                                </div>
+                                                <div className="flex flex-col gap-2 text-sm text-slate-300 w-full sm:w-auto">
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#b0ebd3]"></div> /home <span className="text-slate-500 ml-auto font-mono">40.8%</span></div>
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#7dd3bc]"></div> /products <span className="text-slate-500 ml-auto font-mono">29.0%</span></div>
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#4abda5]"></div> /cart <span className="text-slate-500 ml-auto font-mono">10.7%</span></div>
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#38988e]"></div> /contact <span className="text-slate-500 ml-auto font-mono">10.4%</span></div>
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#24726e]"></div> /about <span className="text-slate-500 ml-auto font-mono">4.88%</span></div>
+                                                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#124c49]"></div> /checkout <span className="text-slate-500 ml-auto font-mono">4.23%</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const EvaluationSection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-slate-900 border-t border-slate-800">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Đánh giá Kiến trúc <span className="text-slate-400 font-light">& Giới hạn Thực tế</span></h2>
+                    </FadeInSection>
+                    
+                    <div className="grid lg:grid-cols-2 gap-8">
+                        {/* Left Column: Success */}
+                        <FadeInSection delay={100} className="bg-[#1a233a] rounded-2xl border-t-4 border-brand-success p-8 shadow-xl flex flex-col justify-between">
+                            <div>
+                                <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Thành quả</h3>
+                                <ul className="space-y-4 text-slate-300 text-lg mb-8">
+                                    <li className="flex items-start"><i data-lucide="check" className="w-6 h-6 mr-3 text-brand-success shrink-0 mt-0.5"></i>Khắc phục triệt để điểm mù độ trễ của cơ sở dữ liệu quan hệ/truyền thống.</li>
+                                    <li className="flex items-start"><i data-lucide="check" className="w-6 h-6 mr-3 text-brand-success shrink-0 mt-0.5"></i>Hoạt động đa nhiệm (Security + BI) xuất sắc.</li>
+                                </ul>
+                            </div>
+                            
+                            {/* SVG Graphic mimicking the slide's decoupled visual */}
+                            <div className="w-full flex justify-center py-6 opacity-80">
+                                <svg width="300" height="150" viewBox="0 0 300 150">
+                                    {/* Lines in */}
+                                    <path d="M0,70 L80,70" stroke="#fcd34d" strokeWidth="2" />
+                                    <path d="M0,60 L80,70" stroke="#fb923c" strokeWidth="2" />
+                                    <path d="M0,80 L80,70" stroke="#6ee7b7" strokeWidth="2" />
+                                    <path d="M0,50 L80,70" stroke="#34d399" strokeWidth="2" />
+                                    <path d="M0,90 L80,70" stroke="#fcd34d" strokeWidth="2" />
+                                    
+                                    {/* Filter box (isometric perspective mock) */}
+                                    <polygon points="80,20 120,40 120,130 80,110" fill="#334155" stroke="#475569" strokeWidth="2"/>
+                                    <polygon points="75,20 80,20 80,110 75,110" fill="#1e293b" />
+                                    
+                                    {/* Lines out - Top (Threats) */}
+                                    <path d="M110,60 Q180,60 250,30" fill="none" stroke="#fb923c" strokeWidth="12" />
+                                    <polygon points="250,20 270,30 250,40" fill="#fb923c" />
+                                    
+                                    {/* Lines out - Bottom (Clean Data) */}
+                                    <path d="M110,80 L250,120" fill="none" stroke="#34d399" strokeWidth="12" />
+                                    <polygon points="245,110 270,126 245,130" fill="#34d399" />
+                                </svg>
+                            </div>
+                        </FadeInSection>
+
+                        {/* Right Column: Limitations */}
+                        <div className="space-y-4">
+                            <FadeInSection delay={200} className="bg-[#1a233a] p-6 rounded-xl border-t-4 border-brand-orange shadow-lg">
+                                <h4 className="text-xl font-bold text-white mb-2">Giới hạn 1 - Single Node</h4>
+                                <p className="text-slate-400 text-sm mb-4">Cấu hình 1 máy trạm hiện tại giới hạn ở mức vài ngàn req/s. Cần nâng cấp lên Multi-node Cluster cho quy mô Enterprise.</p>
+                                <div className="flex items-center justify-center text-slate-500 gap-4 opacity-70">
+                                    <i data-lucide="server" className="w-8 h-8"></i>
+                                    <i data-lucide="arrow-right"></i>
+                                    <div className="grid grid-cols-2 gap-1">
+                                        <i data-lucide="server" className="w-5 h-5"></i><i data-lucide="server" className="w-5 h-5"></i>
+                                        <i data-lucide="server" className="w-5 h-5"></i><i data-lucide="server" className="w-5 h-5"></i>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+
+                            <FadeInSection delay={300} className="bg-[#1a233a] p-6 rounded-xl border-t-4 border-brand-orange shadow-lg">
+                                <h4 className="text-xl font-bold text-white mb-2">Giới hạn 2 - Ngưỡng Tĩnh</h4>
+                                <p className="text-slate-400 text-sm mb-4">Thuật toán (Threshold-based) dễ bị qua mặt bởi các đợt tấn công 'Low and Slow'.</p>
+                                <div className="relative h-12 w-full max-w-[200px] mx-auto opacity-70">
+                                    <div className="absolute top-1/2 left-0 w-full border-t border-slate-500"></div>
+                                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 50">
+                                        <path d="M0,40 Q20,30 40,40 T80,20 T100,10" fill="none" stroke="#fb923c" strokeWidth="2" strokeDasharray="4 2"/>
+                                    </svg>
+                                </div>
+                            </FadeInSection>
+
+                            <FadeInSection delay={400} className="bg-[#1a233a] p-6 rounded-xl border-t-4 border-brand-orange shadow-lg">
+                                <h4 className="text-xl font-bold text-white mb-2">Giới hạn 3 - Data Lake CSV</h4>
+                                <p className="text-slate-400 text-sm mb-4">File CSV thiếu tính năng Schema Evolution. Cần nâng cấp lên Parquet/ElasticSearch.</p>
+                                <div className="flex items-center justify-center gap-4 text-slate-500 opacity-70 text-sm font-mono">
+                                    <div className="px-3 py-1 border border-slate-600 rounded">CSV</div>
+                                    <i data-lucide="arrow-right"></i>
+                                    <div className="flex gap-2">
+                                        <div className="px-2 py-1 bg-blue-900/50 text-blue-300 rounded">Parquet</div>
+                                        <div className="px-2 py-1 bg-yellow-900/50 text-yellow-300 rounded">Elastic</div>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const ConclusionSection = () => (
+            <section className="py-24 px-6 lg:px-20 bg-brand-dark border-t border-slate-800 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Tổng kết: Lá chắn An ninh & Kim chỉ nam Nghiệp vụ</h2>
+                        
+                        <div className="grid md:grid-cols-2 gap-10 mb-12 items-center">
+                            {/* Left: Bullet Points */}
+                            <ul className="space-y-6 text-lg text-slate-300">
+                                <li className="flex items-start">
+                                    <div className="w-2 h-2 mt-2.5 mr-4 bg-brand-cyan rounded-full shrink-0"></div>
+                                    <p>Ứng dụng thành công Kafka & Spark vào bài toán thực tiễn, làm chủ công nghệ dữ liệu đang bay (Data In-Motion).</p>
+                                </li>
+                                <li className="flex items-start">
+                                    <div className="w-2 h-2 mt-2.5 mr-4 bg-brand-cyan rounded-full shrink-0"></div>
+                                    <p>Rút ngắn thời gian phản ứng sự cố xuống mức 3 giây, bảo vệ tài nguyên máy chủ.</p>
+                                </li>
+                            </ul>
+
+                            {/* Right: Summary Table */}
+                            <div className="bg-[#1a233a] border border-slate-700 rounded-xl overflow-hidden">
+                                <div className="bg-[#1e293b] p-4 border-b border-slate-700 font-bold text-white">
+                                    Bảng tổng kết hiệu năng thực nghiệm
+                                </div>
+                                <div className="grid grid-cols-2 text-sm md:text-base border-b border-slate-700/50">
+                                    <div className="p-4 text-slate-400">Tiêu chí</div>
+                                    <div className="p-4 text-slate-400 font-bold">Kết quả</div>
+                                </div>
+                                <div className="grid grid-cols-2 border-b border-slate-700/50 hover:bg-slate-800/50">
+                                    <div className="p-4 text-white">Thông lượng (Throughput)</div>
+                                    <div className="p-4 text-brand-orange font-bold">152 req/s</div>
+                                </div>
+                                <div className="grid grid-cols-2 border-b border-slate-700/50 hover:bg-slate-800/50">
+                                    <div className="p-4 text-white">Độ trễ phản ứng (Latency)</div>
+                                    <div className="p-4 text-brand-orange font-bold">3s</div>
+                                </div>
+                                <div className="grid grid-cols-2 hover:bg-slate-800/50">
+                                    <div className="p-4 text-white">Tỷ lệ chuyển đổi chính xác (CVR)</div>
+                                    <div className="p-4 text-brand-orange font-bold">10.38%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom Quote Box */}
+                        <div className="border border-slate-600 rounded-xl p-8 md:p-12 text-center bg-gradient-to-b from-slate-800/50 to-transparent">
+                            <h3 className="text-xl md:text-3xl font-bold leading-snug text-white">
+                                “Chuyển hóa tệp nhật ký thụ động thành một cỗ máy phân tích chủ động, bảo vệ hệ thống nền tảng đồng thời thúc đẩy chiến lược kinh doanh.”
+                            </h3>
+                        </div>
+
+                        <p className="mt-16 text-center text-slate-500 font-mono text-sm">Kết thúc báo cáo Đồ án môn học. Xin cảm ơn thầy và các bạn.</p>
+                    </FadeInSection>
+                </div>
+            </section>
+        );
+
+        const App = () => {
+            useEffect(() => {
+                // Initialize Lucide icons
+                lucide.createIcons();
+            }, []);
+
+            return (
+                <div className="font-sans text-slate-200 selection:bg-brand-cyan selection:text-slate-900">
+                    <HeroSection />
+                    <TheorySection />
+                    <GoalsSection />
+                    <ArchitectureSection />
+                    <AlgorithmAnimationSection />
+                    <TerminalSection />
+                    <DashboardGallerySection />
+                    <EvaluationSection />
+                    <ConclusionSection />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
