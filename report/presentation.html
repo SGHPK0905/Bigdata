@@ -191,7 +191,7 @@
         );
 
         const GoalsSection = () => (
-                       <section className="py-20 px-6 lg:px-20 bg-slate-900">
+            <section className="py-20 px-6 lg:px-20 bg-slate-900">
                 <div className="max-w-6xl mx-auto">
                     <FadeInSection>
                         <h2 className="text-3xl md:text-4xl font-bold mb-12">Khởi nguồn ý tưởng & <span className="text-brand-cyanLight">Mục tiêu cốt lõi</span></h2>
@@ -689,6 +689,15 @@
                             </FadeInSection>
                         </div>
                     </div>
+                    
+                    {/* Thẻ chốt thông điệp Kafka */}
+                    <FadeInSection delay={500} className="mt-12 bg-brand-cyan/10 border border-brand-cyan/30 rounded-xl p-6 md:p-8 text-center shadow-[0_0_20px_rgba(6,182,212,0.15)] relative overflow-hidden">
+                        <div className="absolute top-1/2 left-0 w-full h-full bg-gradient-to-t from-brand-cyan/5 to-transparent pointer-events-none -translate-y-1/2"></div>
+                        <h3 className="text-xl md:text-3xl font-bold text-brand-cyanLight flex flex-col md:flex-row items-center justify-center gap-4 relative z-10">
+                            <i data-lucide="shield-check" className="w-10 h-10"></i>
+                            “Kafka giúp hệ thống không bị quá tải khi traffic tăng đột biến”
+                        </h3>
+                    </FadeInSection>
                 </div>
             </section>
         );
@@ -786,6 +795,15 @@
                             </FadeInSection>
                         </div>
                     </div>
+
+                    {/* Thẻ chốt thông điệp Spark */}
+                    <FadeInSection delay={500} className="mt-12 bg-brand-orange/10 border border-brand-orange/30 rounded-xl p-6 md:p-8 text-center shadow-[0_0_20px_rgba(249,115,22,0.15)] relative overflow-hidden">
+                        <div className="absolute top-1/2 left-0 w-full h-full bg-gradient-to-t from-brand-orange/5 to-transparent pointer-events-none -translate-y-1/2"></div>
+                        <h3 className="text-xl md:text-3xl font-bold text-brand-orangeLight flex flex-col md:flex-row items-center justify-center gap-4 relative z-10">
+                            <i data-lucide="zap" className="w-10 h-10"></i>
+                            “Spark giúp xử lý dữ liệu gần như ngay lập tức”
+                        </h3>
+                    </FadeInSection>
                 </div>
             </section>
         );
