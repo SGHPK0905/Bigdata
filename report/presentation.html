@@ -190,92 +190,6 @@
             </section>
         );
 
-        const TheorySection = () => (
-            <section className="py-20 px-6 lg:px-20 bg-brand-dark border-t border-slate-800">
-                <div className="max-w-6xl mx-auto">
-                    <FadeInSection>
-                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Cơ sở lý thuyết: <span className="text-brand-cyanLight">Big Data 5V & Công nghệ lõi</span></h2>
-                    </FadeInSection>
-                    
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <FadeInSection delay={100} className="glass-panel p-8 rounded-2xl relative">
-                            <h3 className="text-xl font-bold mb-4 text-center text-slate-200">Mô hình Big Data 5V</h3>
-                            <div className="relative w-[280px] h-[280px] mx-auto mt-8 mb-4">
-                                {/* Vòng tròn mũi tên kết nối SVG */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 280 280">
-                                    <defs>
-                                        <marker id="arrow-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4" />
-                                        </marker>
-                                    </defs>
-                                    <path d="M 181 38 A 110 110 0 0 1 224 70" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
-                                    <path d="M 249 147 A 110 110 0 0 1 233 198" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
-                                    <path d="M 166 246 A 110 110 0 0 1 114 246" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
-                                    <path d="M 47 198 A 110 110 0 0 1 31 147" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
-                                    <path d="M 56 70 A 110 110 0 0 1 99 38" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
-                                </svg>
-
-                                {/* Các node 5V */}
-                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '30px', left: '140px', transform: 'translate(-50%, -50%)' }}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
-                                    <span className="font-semibold block text-sm text-slate-200">Volume</span>
-                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Khối lượng lớn</span>
-                                </div>
-                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '245px', transform: 'translate(-50%, -50%)' }}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
-                                    <span className="font-semibold block text-sm text-slate-200">Variety</span>
-                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Đa dạng</span>
-                                </div>
-                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '205px', transform: 'translate(-50%, -50%)' }}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
-                                    <span className="font-semibold block text-sm text-slate-200">Value</span>
-                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Giá trị</span>
-                                </div>
-                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '75px', transform: 'translate(-50%, -50%)' }}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
-                                    <span className="font-semibold block text-sm text-slate-200">Veracity</span>
-                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Độ tin cậy</span>
-                                </div>
-                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '35px', transform: 'translate(-50%, -50%)' }}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
-                                    <span className="font-semibold block text-sm text-slate-200">Velocity</span>
-                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Tốc độ</span>
-                                </div>
-                            </div>
-                        </FadeInSection>
-
-                        <div className="space-y-8">
-                            <FadeInSection delay={200} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-cyan">
-                                <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-2xl font-bold">Apache Kafka</h3>
-                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Trạm đệm</span>
-                                </div>
-                                <ul className="space-y-3 text-slate-300">
-                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Xử lý luồng dữ liệu phân tán</li>
-                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Thông lượng cao, độ trễ thấp</li>
-                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Khả năng mở rộng linh hoạt</li>
-                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Bền bỉ, chịu lỗi tốt</li>
-                                </ul>
-                            </FadeInSection>
-
-                            <FadeInSection delay={300} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-orange">
-                                <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-2xl font-bold">Apache Spark</h3>
-                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Lõi xử lý</span>
-                                </div>
-                                <ul className="space-y-3 text-slate-300">
-                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Tính toán trên bộ nhớ (In-Memory)</li>
-                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý dữ liệu lớn nhanh chóng</li>
-                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Thư viện đa dạng (SQL, MLlib)</li>
-                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý theo luồng (Micro-batching)</li>
-                                </ul>
-                            </FadeInSection>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-
         const GoalsSection = () => (
                        <section className="py-20 px-6 lg:px-20 bg-slate-900">
                 <div className="max-w-6xl mx-auto">
@@ -414,6 +328,92 @@
             </section>
         );
 
+        const TheorySection = () => (
+            <section className="py-20 px-6 lg:px-20 bg-brand-dark border-t border-slate-800">
+                <div className="max-w-6xl mx-auto">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Cơ sở lý thuyết: <span className="text-brand-cyanLight">Big Data 5V & Công nghệ lõi</span></h2>
+                    </FadeInSection>
+                    
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <FadeInSection delay={100} className="glass-panel p-8 rounded-2xl relative">
+                            <h3 className="text-xl font-bold mb-4 text-center text-slate-200">Mô hình Big Data 5V</h3>
+                            <div className="relative w-[280px] h-[280px] mx-auto mt-8 mb-4">
+                                {/* Vòng tròn mũi tên kết nối SVG */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 280 280">
+                                    <defs>
+                                        <marker id="arrow-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4" />
+                                        </marker>
+                                    </defs>
+                                    <path d="M 181 38 A 110 110 0 0 1 224 70" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 249 147 A 110 110 0 0 1 233 198" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 166 246 A 110 110 0 0 1 114 246" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 47 198 A 110 110 0 0 1 31 147" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                    <path d="M 56 70 A 110 110 0 0 1 99 38" fill="none" stroke="#06b6d4" strokeWidth="2" markerEnd="url(#arrow-v)" />
+                                </svg>
+
+                                {/* Các node 5V */}
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '30px', left: '140px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Volume</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Khối lượng lớn</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '245px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Variety</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Đa dạng</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '205px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-success flex items-center justify-center text-xl font-bold text-brand-success mb-1 bg-slate-800 shadow-lg shadow-brand-success/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Value</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Giá trị</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '229px', left: '75px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Veracity</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Độ tin cậy</span>
+                                </div>
+                                <div className="absolute flex flex-col items-center justify-center w-24" style={{ top: '106px', left: '35px', transform: 'translate(-50%, -50%)' }}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-brand-cyan flex items-center justify-center text-xl font-bold text-brand-cyan mb-1 bg-slate-800 shadow-lg shadow-brand-cyan/20">V</div>
+                                    <span className="font-semibold block text-sm text-slate-200">Velocity</span>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap">Tốc độ</span>
+                                </div>
+                            </div>
+                        </FadeInSection>
+
+                        <div className="space-y-8">
+                            <FadeInSection delay={200} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-cyan">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-2xl font-bold">Apache Kafka</h3>
+                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Trạm đệm</span>
+                                </div>
+                                <ul className="space-y-3 text-slate-300">
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Xử lý luồng dữ liệu phân tán</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Thông lượng cao, độ trễ thấp</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Khả năng mở rộng linh hoạt</li>
+                                    <li className="flex items-start"><i data-lucide="check-circle" className="w-5 h-5 mr-3 text-brand-cyan shrink-0 mt-0.5"></i>Bền bỉ, chịu lỗi tốt</li>
+                                </ul>
+                            </FadeInSection>
+
+                            <FadeInSection delay={300} className="glass-panel p-8 rounded-2xl border-l-4 border-l-brand-orange">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-2xl font-bold">Apache Spark</h3>
+                                    <span className="px-3 py-1 bg-slate-800 rounded text-xs font-mono">Lõi xử lý</span>
+                                </div>
+                                <ul className="space-y-3 text-slate-300">
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Tính toán trên bộ nhớ (In-Memory)</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý dữ liệu lớn nhanh chóng</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Thư viện đa dạng (SQL, MLlib)</li>
+                                    <li className="flex items-start"><i data-lucide="zap" className="w-5 h-5 mr-3 text-brand-orange shrink-0 mt-0.5"></i>Xử lý theo luồng (Micro-batching)</li>
+                                </ul>
+                            </FadeInSection>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+        
         const ArchitectureSection = () => (
             <section className="py-20 px-6 lg:px-20 bg-slate-900 border-t border-slate-800">
                 <div className="max-w-6xl mx-auto">
@@ -1242,9 +1242,9 @@
             return (
                 <div className="font-sans text-slate-200 selection:bg-brand-cyan selection:text-slate-900">
                     <HeroSection />
-                    <TheorySection />
                     <GoalsSection />
                     <SolutionSection />
+                    <TheorySection />
                     <ArchitectureSection />
                     <AlgorithmAnimationSection />
                     <Station1Section />
