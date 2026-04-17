@@ -606,22 +606,22 @@ Dựa trên các kết quả thực nghiệm đã trình bày, đồ án đã gi
 
 Thành quả nổi bật nhất của đồ án là việc xây dựng hoàn thiện Bảng điều khiển trung tâm đa nhiệm. Giao diện không chỉ thực hiện tốt vai trò của một hệ thống quản lý sự kiện bảo mật thông qua việc cô lập chính xác các chiến dịch tấn công dò đoán mật khẩu, rà quét lỗ hổng và công cụ thu thập dữ liệu; mà còn tái sử dụng dữ liệu thành công để trích xuất các chỉ số phễu chuyển đổi kinh doanh mang tính chiến lược.
 
-\section*{2. Hạn chế tồn tại và Đánh giá hiệu năng (Benchmark)}
+\section*{2. Hạn chế tồn tại và Đánh giá hiệu năng}
 Bên cạnh những kết quả đạt được, kiến trúc hiện tại vẫn còn một số điểm giới hạn về mặt kỹ thuật cần được làm rõ:
 \begin{itemize}
-    \item \textbf{Giới hạn về độ trễ (Latency):} Hệ thống áp dụng cơ chế chia lô nhỏ (Micro-batching) của Spark với chu kỳ kích hoạt 3 giây/lần. Do đó, độ trễ tối thiểu của hệ thống luôn lớn hơn hoặc bằng 3 giây. Dù đáp ứng tốt các bài toán thực tế, nhưng kiến trúc này chưa thể đạt đến mức độ trễ tính bằng mili-giây (Sub-millisecond Latency) như cơ chế xử lý luồng liên tục (Continuous Processing) \cite{zaharia2013}.
-    \item \textbf{Mâu thuẫn Thông lượng (Throughput):} Mặc dù mức tải giả lập trong đồ án chỉ ở ngưỡng 152 req/s để phục vụ mục đích quan sát trực quan, nhưng giới hạn phần cứng thực tế của kiến trúc Kafka-Spark trên môi trường đơn trạm (Single-node) có thể xử lý mượt mà lên đến xấp xỉ 3,000 req/s \cite{confluent_bench}. Để đáp ứng quy mô doanh nghiệp (vượt ngưỡng hàng trăm ngàn req/s), hệ thống bắt buộc phải được triển khai trên cụm đa trạm (Multi-node Cluster).
-    \item \textbf{Ngưỡng phát hiện thô sơ (Threshold-based):} Việc cấu hình ngưỡng phát hiện tĩnh (ví dụ: lớn hơn 10 lỗi/phút) mang tính chất thực nghiệm (Empirical). Tin tặc có thể dễ dàng vượt qua cơ chế này bằng các kỹ thuật tấn công phân tán nhịp độ chậm (Low and Slow attacks) để tránh kích hoạt cảnh báo.
-    \item \textbf{Định dạng lưu trữ Hồ dữ liệu:} Việc sử dụng tệp tin văn bản thuần CSV làm Data Lake là một sự chấp nhận đánh đổi trong phạm vi đồ án. Định dạng CSV bộc lộ rõ yếu điểm khi không hỗ trợ tiến hóa lược đồ (Schema Evolution), thiếu khả năng phân mảnh truy vấn (Partition Pruning) và ghi đồng thời (Concurrent Writes).
+    \item \textbf{Giới hạn về độ trễ:} Hệ thống áp dụng cơ chế chia lô nhỏ Micro-batching của Spark với chu kỳ kích hoạt 3 giây/lần. Do đó, độ trễ tối thiểu của hệ thống luôn lớn hơn hoặc bằng 3 giây. Dù đáp ứng tốt các bài toán thực tế, nhưng kiến trúc này chưa thể đạt đến mức độ trễ tính bằng mili-giây như cơ chế xử lý luồng liên tục \cite{zaharia2013}.
+    \item \textbf{Mâu thuẫn Thông lượng:} Mặc dù mức tải giả lập trong đồ án chỉ ở ngưỡng 152 req/s để phục vụ mục đích quan sát trực quan, nhưng giới hạn phần cứng thực tế của kiến trúc Kafka-Spark trên môi trường đơn trạm có thể xử lý mượt mà lên đến xấp xỉ 3,000 req/s \cite{confluent_bench}. Để đáp ứng quy mô doanh nghiệp (vượt ngưỡng hàng trăm ngàn req/s), hệ thống bắt buộc phải được triển khai trên cụm đa trạm.
+    \item \textbf{Ngưỡng phát hiện thô sơ:} Việc cấu hình ngưỡng phát hiện tĩnh (ví dụ: lớn hơn 10 lỗi/phút) mang tính chất thực nghiệm. Tin tặc có thể dễ dàng vượt qua cơ chế này bằng các kỹ thuật tấn công phân tán nhịp độ chậm để tránh kích hoạt cảnh báo.
+    \item \textbf{Định dạng lưu trữ Hồ dữ liệu:} Việc sử dụng tệp tin văn bản thuần CSV làm Data Lake là một sự chấp nhận đánh đổi trong phạm vi đồ án. Định dạng CSV bộc lộ rõ yếu điểm khi không hỗ trợ tiến hóa lược đồ, thiếu khả năng phân mảnh truy vấn và ghi đồng thời.
     \item \textbf{Cơ chế đồng bộ Danh sách chặn:} Phân hệ BI hiện đang lọc IP độc hại dựa trên danh sách tĩnh. Nếu một IP thay đổi hành vi giữa các chu kỳ, bảng điều khiển sẽ không phản ánh kịp thời do thiếu cơ chế đồng bộ danh sách đen qua bộ nhớ đệm tốc độ cao.
 \end{itemize}
 
 \section*{3. Hướng phát triển trong tương lai}
 Để khắc phục các điểm hạn chế và nâng cấp hệ thống lên quy mô doanh nghiệp, định hướng nghiên cứu tiếp theo sẽ tập trung vào:
 \begin{itemize}
-    \item \textbf{Tích hợp Học máy phân tán (Distributed Machine Learning):} Áp dụng thư viện Spark MLlib để xây dựng mô hình Rừng cô lập (Isolation Forest) hoặc Phân cụm K-Means, giúp hệ thống tự động học hỏi hành vi và nhận diện các mẫu hình tấn công dị thường mà không cần định nghĩa các ngưỡng tĩnh lỗi thời.
+    \item \textbf{Tích hợp Học máy phân tán:} Áp dụng thư viện Spark MLlib để xây dựng mô hình Isolation Forest hoặc Phân cụm K-Means, giúp hệ thống tự động học hỏi hành vi và nhận diện các mẫu hình tấn công dị thường mà không cần định nghĩa các ngưỡng tĩnh lỗi thời.
     \item \textbf{Tối ưu hóa Khả năng mở rộng lưu trữ:} Thay thế hoàn toàn tệp tĩnh CSV bằng các định dạng dữ liệu hướng cột tối ưu như Apache Parquet, hoặc tích hợp các kho dữ liệu chuyên dụng như ElasticSearch nhằm tối ưu hóa tốc độ truy vấn phân tích khi quy mô đạt ngưỡng Terabyte.
-    \item \textbf{Đồng bộ hóa Trạng thái theo thời gian thực:} Tích hợp cơ sở dữ liệu in-memory như Redis để chia sẻ và cập nhật danh sách IP bị chặn (Blacklist) liên tục giữa cụm xử lý Spark và giao diện Dashboard BI.
+    \item \textbf{Đồng bộ hóa Trạng thái theo thời gian thực:} Tích hợp cơ sở dữ liệu in-memory như Redis để chia sẻ và cập nhật danh sách IP bị chặn liên tục giữa cụm xử lý Spark và giao diện Dashboard BI.
 \end{itemize}
 
 \chapter*{LỜI CẢM ƠN}
