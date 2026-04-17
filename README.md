@@ -1,6 +1,6 @@
 # 🏭 Data Turbine - Hệ Thống SOC & Phân Tích Dữ Liệu Lớn Thời Gian Thực
 
-![Project Banner](sodokientruc.png) [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+![Project Banner](report/sodokientruc.png) [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-3.x-black?logo=apachekafka)](https://kafka.apache.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache_Spark-3.x-E25A1C?logo=apachespark)](https://spark.apache.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
